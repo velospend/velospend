@@ -196,7 +196,11 @@ export type MoreStackParamList = {
   MoreScreen: undefined;
   ProfileScreen: undefined;
   AccountsScreen: undefined;
+  AddAccountScreen: undefined;
+  EditAccountScreen: { accountId: string };
   CategoriesScreen: undefined;
+  AddCategoryScreen: undefined;
+  EditCategoryScreen: { categoryId: string };
   InvestmentsScreen: undefined;
   InvestmentDetailScreen: { investmentId: string };
   AddInvestmentScreen: undefined;
@@ -206,4 +210,21 @@ export type MoreStackParamList = {
   AddRecurringReminderScreen: undefined;
   EditRecurringReminderScreen: { reminderId: string };
   SettingsScreen: undefined;
+};
+
+export type CalculatorStackParamList = {
+  CalculatorsScreen: undefined;
+  SimpleInterestScreen: undefined;
+  CompoundInterestScreen: undefined;
+  LoanCalculatorScreen: undefined;
+  SIPCalculatorScreen: undefined;
+  FDCalculatorScreen: undefined;
+};
+
+export type ReportsStackParamList = {
+  ReportsScreen: undefined;
+};
+
+export type RootStackParamList = {
+  MainApp: undefined;
 };

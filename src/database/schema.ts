@@ -183,3 +183,26 @@ export const seedDefaultCategories = (userId: string): void => {
     );
   });
 };
+
+export const seedGuestUser = (): string => {
+  const db = getDatabase();
+
+  const existing = db.getFirstSync<{ id: string }>(
+    `SELECT id FROM users LIMIT 1`
+  );
+
+  if (existing) return existing.id;
+
+  const id = uuid.v4() as string;
+  const now = new Date().toISOString();
+
+  db.runSync(
+    `INSERT INTO users (id, name, email, dob, city, country, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, "Guest", "", "", "", "", now]
+  );
+
+  seedDefaultCategories(id);
+
+  return id;
+};

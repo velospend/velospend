@@ -1,11 +1,14 @@
 import { useEffect } from "react";
-import { View, Text } from "react-native";
-import { createTables } from "./src/database/schema";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
+import { createTables, seedGuestUser } from "./src/database/schema";
+import RootNavigator from "./src/navigation";
 
 export default function App() {
   useEffect(() => {
     try {
       createTables();
+      seedGuestUser();
       console.log("✅ Database initialized successfully");
     } catch (error) {
       console.error("❌ Database initialization failed:", error);
@@ -13,8 +16,10 @@ export default function App() {
   }, []);
 
   return (
-    <View className="flex-1 items-center justify-center bg-blue-500">
-      <Text className="text-white text-2xl font-bold">Creating Yash as co-author in github</Text>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
