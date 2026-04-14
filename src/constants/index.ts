@@ -127,12 +127,12 @@ export const SHADOWS = {
 // ─── Account Types ────────────────────────────────────────────────────────────
 
 export const ACCOUNT_TYPES = [
-  { label: "Bank", value: "bank", icon: "bank" },
   { label: "Cash", value: "cash", icon: "cash" },
   { label: "Wallet", value: "wallet", icon: "wallet" },
   { label: "Savings Account", value: "savings", icon: "piggy-bank" },
   { label: "Current Account", value: "current", icon: "briefcase" },
   { label: "Credit Card", value: "credit_card", icon: "credit-card" },
+  { label: "Gift Card", value: "gift_card", icon: "gift" },
   { label: "Other", value: "other", icon: "dots-horizontal" },
 ] as const;
 

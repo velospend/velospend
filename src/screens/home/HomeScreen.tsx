@@ -170,7 +170,7 @@ export default function HomeScreen() {
 
 function AccountCard({ account }: { account: Account }) {
   const accountColors: Record<string, string> = {
-    bank: "#6C63FF",
+    gift_card: "#6C63FF",
     cash: "#2ECC71",
     wallet: "#F39C12",
     savings: "#3498DB",
@@ -180,7 +180,7 @@ function AccountCard({ account }: { account: Account }) {
   };
 
   const accountIcons: Record<string, string> = {
-    bank: "bank",
+    gift_card: "gift",
     cash: "cash",
     wallet: "wallet",
     savings: "piggy-bank",
