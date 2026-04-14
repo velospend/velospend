@@ -32,9 +32,9 @@ export default function HomeScreen() {
     if (user) loadRecentTransactions(user.id);
   }, [user]);
 
-  const totalBalance = accounts.reduce(
-    (sum, acc) => sum + acc.currentBalance, 0
-  );
+  // const totalBalance = accounts.reduce(
+  //   (sum, acc) => sum + acc.currentBalance, 0
+  // );
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.background }}>
@@ -42,35 +42,25 @@ export default function HomeScreen() {
 
       {/* Header */}
       <View
-        className="px-5 pt-14 pb-6"
-        style={{ backgroundColor: COLORS.primary }}
-      >
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-white text-sm opacity-80">Welcome back,</Text>
-            <Text className="text-white text-2xl font-bold">
-              {user?.name || "Guest"} 👋
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("AddAccountScreen")}
-            className="w-10 h-10 rounded-full items-center justify-center"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-          >
-            <MaterialCommunityIcons name="menu" size={22} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Total Balance */}
-        <View className="mt-5 items-center">
-          <Text className="text-white text-sm opacity-80 mb-1">
-            Total Balance
-          </Text>
-          <Text className="text-white text-4xl font-bold">
-            ₹{totalBalance.toLocaleString("en-IN")}
-          </Text>
-        </View>
-      </View>
+  className="px-5 pt-14 pb-5"
+  style={{ backgroundColor: COLORS.primary }}
+>
+  <View className="flex-row items-center justify-between">
+    <View>
+      <Text className="text-white text-sm opacity-80">Welcome back,</Text>
+      <Text className="text-white text-2xl font-bold">
+        {user?.name || "Guest"} 👋
+      </Text>
+    </View>
+    <TouchableOpacity
+  onPress={() => navigation.navigate("MoreScreen")}
+  className="w-10 h-10 rounded-full items-center justify-center"
+  style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+>
+  <MaterialCommunityIcons name="menu" size={22} color="white" />
+</TouchableOpacity>
+  </View>
+</View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}

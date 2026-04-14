@@ -180,6 +180,7 @@ export type HomeStackParamList = {
   EditTransactionScreen: { transactionId: string };
   AddAccountScreen: undefined;
   EditAccountScreen: { accountId: string };
+  MoreScreen: undefined;
 };
 
 export type PlannerStackParamList = {
