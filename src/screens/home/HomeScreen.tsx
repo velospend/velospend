@@ -75,7 +75,7 @@ export default function HomeScreen() {
             >
               My Accounts
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("AccountsScreen")}>
               <Text
                 className="text-sm font-semibold"
                 style={{ color: COLORS.primary }}

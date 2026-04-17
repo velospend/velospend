@@ -61,6 +61,7 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="EditTransactionScreen" component={AddTransactionScreen} />
       <HomeStack.Screen name="AddAccountScreen" component={AddAccountScreen} />
       <HomeStack.Screen name="EditAccountScreen" component={AddAccountScreen} />
+      <HomeStack.Screen name="AccountsScreen" component={AccountsScreen} />
       <HomeStack.Screen name="MoreScreen" component={MoreScreen} />
     </HomeStack.Navigator>
   );

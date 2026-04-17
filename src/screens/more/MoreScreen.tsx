@@ -26,7 +26,7 @@ const MENU_SECTIONS = [
   {
     title: "Finance",
     items: [
-      { id: "accounts", label: "Accounts", icon: "bank", color: "#6C63FF", screen: "AddAccountScreen" },
+      { id: "accounts", label: "Accounts", icon: "bank", color: "#6C63FF", screen: "AccountsScreen" },
       { id: "categories", label: "Categories", icon: "tag-multiple", color: "#F39C12", screen: "AddAccountScreen" },
       { id: "investments", label: "Investments", icon: "trending-up", color: "#2ECC71", screen: "AddAccountScreen" },
       { id: "recurring", label: "Recurring Reminders", icon: "bell-ring", color: "#3498DB", screen: "AddAccountScreen" },

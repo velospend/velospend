@@ -13,7 +13,7 @@ export interface User {
 // ─── Account ────────────────────────────────────────────────────────────────
 
 export type AccountType =
-  | "bank"
+  | "gift_card"
   | "cash"
   | "wallet"
   | "savings"
@@ -180,6 +180,7 @@ export type HomeStackParamList = {
   EditTransactionScreen: { transactionId: string };
   AddAccountScreen: undefined;
   EditAccountScreen: { accountId: string };
+  AccountsScreen: undefined;
   MoreScreen: undefined;
 };
 

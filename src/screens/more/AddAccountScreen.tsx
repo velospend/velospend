@@ -21,7 +21,7 @@ export default function AddAccountScreen() {
   const { user, loadAccounts } = useUserStore();
 
   const [name, setName] = useState("");
-  const [selectedType, setSelectedType] = useState("bank");
+  const [selectedType, setSelectedType] = useState("savings");
   const [openingBalance, setOpeningBalance] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("INR");
   const [loading, setLoading] = useState(false);
