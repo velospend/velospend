@@ -110,3 +110,56 @@ const mapTransaction = (row: any): Transaction => ({
   isArchived: row.is_archived === 1,
   createdAt: row.created_at,
 });
+
+export const getPreviousNotes = (userId: string): string[] => {
+  const db = getDatabase();
+  const rows = db.getAllSync<any>(
+    `SELECT DISTINCT note FROM transactions 
+     WHERE user_id = ? AND note IS NOT NULL AND note != ''
+     ORDER BY created_at DESC LIMIT 50`,
+    [userId]
+  );
+  return rows.map((row) => row.note);
+};
+
+export const getFilteredTransactions = (
+  userId: string,
+  filters: {
+    type?: string;
+    accountId?: string;
+    categoryId?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+): Transaction[] => {
+  const db = getDatabase();
+
+  let query = `SELECT * FROM transactions WHERE user_id = ? AND is_archived = 0`;
+  const params: any[] = [userId];
+
+  if (filters.type) {
+    query += ` AND type = ?`;
+    params.push(filters.type);
+  }
+  if (filters.accountId) {
+    query += ` AND account_id = ?`;
+    params.push(filters.accountId);
+  }
+  if (filters.categoryId) {
+    query += ` AND category_id = ?`;
+    params.push(filters.categoryId);
+  }
+  if (filters.startDate) {
+    query += ` AND date_time >= ?`;
+    params.push(filters.startDate);
+  }
+  if (filters.endDate) {
+    query += ` AND date_time <= ?`;
+    params.push(filters.endDate);
+  }
+
+  query += ` ORDER BY date_time DESC`;
+
+  const rows = db.getAllSync<any>(query, params);
+  return rows.map(mapTransaction);
+};

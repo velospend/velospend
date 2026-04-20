@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,21 +10,50 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, ACCOUNT_TYPES, CURRENCIES } from "../../constants";
-import { createAccount } from "../../database/queries/accounts";
+import { createAccount, updateAccount } from "../../database/queries/accounts";
 import { useUserStore } from "../../store/useUserStore";
+import { HomeStackParamList } from "../../types";
+import { getDatabase } from "../../database/db";
+
+type RouteType = RouteProp<HomeStackParamList, "EditAccountScreen">;
 
 export default function AddAccountScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteType>();
   const { user, loadAccounts } = useUserStore();
+
+  const accountId = (route.params as any)?.accountId;
+  const isEditing = !!accountId;
 
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState("savings");
   const [openingBalance, setOpeningBalance] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("INR");
   const [loading, setLoading] = useState(false);
+
+  // load existing account data if editing
+  useEffect(() => {
+    if (isEditing) {
+      try {
+        const db = getDatabase();
+        const row = db.getFirstSync<any>(
+          `SELECT * FROM accounts WHERE id = ?`,
+          [accountId]
+        );
+        if (row) {
+          setName(row.name);
+          setSelectedType(row.type);
+          setOpeningBalance(row.current_balance.toString());
+          setSelectedCurrency(row.currency);
+        }
+      } catch (error) {
+        Alert.alert("Error", "Could not load account details.");
+      }
+    }
+  }, [accountId]);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -36,15 +65,28 @@ export default function AddAccountScreen() {
 
     try {
       setLoading(true);
-      createAccount({
-        userId: user!.id,
-        name: name.trim(),
-        type: selectedType as any,
-        totalAmount: balance,
-        currentBalance: balance,
-        currency: selectedCurrency,
-        isActive: true,
-      });
+
+      if (isEditing) {
+        updateAccount(accountId, {
+          name: name.trim(),
+          type: selectedType as any,
+          totalAmount: balance,
+          currentBalance: balance,
+          currency: selectedCurrency,
+          isActive: true,
+        });
+      } else {
+        createAccount({
+          userId: user!.id,
+          name: name.trim(),
+          type: selectedType as any,
+          totalAmount: balance,
+          currentBalance: balance,
+          currency: selectedCurrency,
+          isActive: true,
+        });
+      }
+
       loadAccounts();
       navigation.goBack();
     } catch (error) {
@@ -75,7 +117,9 @@ export default function AddAccountScreen() {
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color="white" />
           </TouchableOpacity>
-          <Text className="text-white text-xl font-bold">Add Account</Text>
+          <Text className="text-white text-xl font-bold">
+            {isEditing ? "Edit Account" : "Add Account"}
+          </Text>
         </View>
       </View>
 
@@ -147,8 +191,8 @@ export default function AddAccountScreen() {
           </View>
         </SectionCard>
 
-        {/* Opening Balance */}
-        <SectionCard title="Opening Balance">
+        {/* Balance */}
+        <SectionCard title={isEditing ? "Current Balance" : "Opening Balance"}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -218,7 +262,7 @@ export default function AddAccountScreen() {
           }}
         >
           <Text className="text-white text-base font-bold">
-            {loading ? "Saving..." : "Save Account"}
+            {loading ? "Saving..." : isEditing ? "Update Account" : "Save Account"}
           </Text>
         </TouchableOpacity>
       </ScrollView>
