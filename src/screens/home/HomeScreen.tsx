@@ -8,7 +8,7 @@ import {
   StatusBar,
   Platform,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, SPACING, RADIUS } from "../../constants";
@@ -24,13 +24,17 @@ export default function HomeScreen() {
   const { user, accounts, loadUser, loadAccounts } = useUserStore();
   const { recentTransactions, loadRecentTransactions } = useTransactionStore();
 
-  useEffect(() => {
+  useFocusEffect(
+  useCallback(() => {
     loadUser();
-  }, []);
+  }, [])
+);
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     if (user) loadRecentTransactions(user.id);
-  }, [user]);
+  }, [user])
+);
 
   // const totalBalance = accounts.reduce(
   //   (sum, acc) => sum + acc.currentBalance, 0

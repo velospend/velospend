@@ -48,13 +48,10 @@ export const updateAccount = (
 ): void => {
   const db = getDatabase();
   db.runSync(
-    `UPDATE accounts SET name = ?, type = ?, total_amount = ?, 
-     current_balance = ?, currency = ?, is_active = ? WHERE id = ?`,
+    `UPDATE accounts SET name = ?, type = ?, currency = ?, is_active = ? WHERE id = ?`,
     [
       data.name ?? "",
-      data.type ?? "bank",
-      data.totalAmount ?? 0,
-      data.currentBalance ?? 0,
+      data.type ?? "savings",
       data.currency ?? "INR",
       data.isActive ? 1 : 0,
       id,

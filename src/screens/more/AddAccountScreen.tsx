@@ -56,45 +56,48 @@ export default function AddAccountScreen() {
   }, [accountId]);
 
   const handleSave = () => {
-    if (!name.trim()) {
-      Alert.alert("Missing Name", "Please enter an account name.");
-      return;
+  if (!name.trim()) {
+    Alert.alert("Missing Name", "Please enter an account name.");
+    return;
+  }
+
+  const balance = parseFloat(openingBalance) || 0;
+
+  try {
+    setLoading(true);
+
+    if (isEditing) {
+      // when editing, only update name, type, currency
+      // current_balance is updated separately via transactions
+      updateAccount(accountId, {
+        name: name.trim(),
+        type: selectedType as any,
+        totalAmount: balance,
+        currentBalance: balance,
+        currency: selectedCurrency,
+        isActive: true,
+      });
+    } else {
+      // when creating, set both total and current to opening balance
+      createAccount({
+        userId: user!.id,
+        name: name.trim(),
+        type: selectedType as any,
+        totalAmount: balance,
+        currentBalance: balance,
+        currency: selectedCurrency,
+        isActive: true,
+      });
     }
 
-    const balance = parseFloat(openingBalance) || 0;
-
-    try {
-      setLoading(true);
-
-      if (isEditing) {
-        updateAccount(accountId, {
-          name: name.trim(),
-          type: selectedType as any,
-          totalAmount: balance,
-          currentBalance: balance,
-          currency: selectedCurrency,
-          isActive: true,
-        });
-      } else {
-        createAccount({
-          userId: user!.id,
-          name: name.trim(),
-          type: selectedType as any,
-          totalAmount: balance,
-          currentBalance: balance,
-          currency: selectedCurrency,
-          isActive: true,
-        });
-      }
-
-      loadAccounts();
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert("Error", "Could not save account. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadAccounts();
+    navigation.goBack();
+  } catch (error) {
+    Alert.alert("Error", "Could not save account. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -192,32 +195,48 @@ export default function AddAccountScreen() {
         </SectionCard>
 
         {/* Balance */}
-        <SectionCard title={isEditing ? "Current Balance" : "Opening Balance"}>
-          <View
-            className="flex-row items-center rounded-xl px-3"
-            style={{
-              backgroundColor: COLORS.gray100,
-              borderWidth: 1,
-              borderColor: COLORS.border,
-            }}
-          >
-            <Text
-              className="text-base font-bold mr-1"
-              style={{ color: COLORS.gray400 }}
-            >
-              ₹
-            </Text>
-            <TextInput
-              value={openingBalance}
-              onChangeText={setOpeningBalance}
-              placeholder="0.00"
-              placeholderTextColor={COLORS.textMuted}
-              keyboardType="decimal-pad"
-              className="flex-1 py-3 px-2 text-base"
-              style={{ color: COLORS.textPrimary }}
-            />
-          </View>
-        </SectionCard>
+<SectionCard title={isEditing ? "Current Balance" : "Opening Balance"}>
+  <View
+    className="flex-row items-center rounded-xl px-3"
+    style={{
+      backgroundColor: isEditing ? COLORS.gray200 : COLORS.gray100,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    }}
+  >
+    <Text
+      className="text-base font-bold mr-1"
+      style={{ color: COLORS.gray400 }}
+    >
+      ₹
+    </Text>
+    <TextInput
+      value={openingBalance}
+      onChangeText={setOpeningBalance}
+      placeholder="0.00"
+      placeholderTextColor={COLORS.textMuted}
+      keyboardType="decimal-pad"
+      editable={!isEditing}
+      className="flex-1 py-3 px-2 text-base"
+      style={{ color: isEditing ? COLORS.textMuted : COLORS.textPrimary }}
+    />
+    {isEditing && (
+      <MaterialCommunityIcons
+        name="lock"
+        size={18}
+        color={COLORS.gray400}
+      />
+    )}
+  </View>
+  {isEditing && (
+    <Text
+      className="text-xs mt-2 ml-1"
+      style={{ color: COLORS.textMuted }}
+    >
+      Balance updates automatically via transactions
+    </Text>
+  )}
+</SectionCard>
 
         {/* Currency */}
         <SectionCard title="Currency">

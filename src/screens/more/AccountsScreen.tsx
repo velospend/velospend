@@ -152,11 +152,8 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
   const color = accountColors[account.type] || COLORS.primary;
   const icon = accountIcons[account.type] || "bank";
 
-  const usedAmount = account.totalAmount - account.currentBalance;
-  const usedPercent =
-    account.totalAmount > 0
-      ? Math.min((usedAmount / account.totalAmount) * 100, 100)
-      : 0;
+  const change = account.currentBalance - account.totalAmount;
+  const isPositive = change >= 0;
 
   return (
     <View
@@ -189,6 +186,22 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
             >
               {account.type.replace("_", " ")} · {account.currency}
             </Text>
+            {/* Balance change since opening */}
+            {change !== 0 && (
+              <View className="flex-row items-center mt-0.5">
+                <MaterialCommunityIcons
+                  name={isPositive ? "trending-up" : "trending-down"}
+                  size={12}
+                  color={isPositive ? COLORS.income : COLORS.expense}
+                />
+                <Text
+                  className="text-xs ml-0.5 font-semibold"
+                  style={{ color: isPositive ? COLORS.income : COLORS.expense }}
+                >
+                  {isPositive ? "+" : ""}₹{change.toLocaleString("en-IN")} since opening
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -200,7 +213,13 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
           >
             ₹{account.currentBalance.toLocaleString("en-IN")}
           </Text>
-          <View className="flex-row mt-1 gap-2">
+          <Text
+            className="text-xs mt-0.5"
+            style={{ color: COLORS.textMuted }}
+          >
+            Opening: ₹{account.totalAmount.toLocaleString("en-IN")}
+          </Text>
+          <View className="flex-row mt-2 gap-2">
             <TouchableOpacity
               onPress={onEdit}
               className="w-7 h-7 rounded-full items-center justify-center"
@@ -226,32 +245,6 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
           </View>
         </View>
       </View>
-
-      {/* Progress Bar — used vs total */}
-      {account.totalAmount > 0 && (
-        <View className="mt-3">
-          <View className="flex-row justify-between mb-1">
-            <Text className="text-xs" style={{ color: COLORS.textMuted }}>
-              Used: ₹{usedAmount.toLocaleString("en-IN")}
-            </Text>
-            <Text className="text-xs" style={{ color: COLORS.textMuted }}>
-              Total: ₹{account.totalAmount.toLocaleString("en-IN")}
-            </Text>
-          </View>
-          <View
-            className="h-1.5 rounded-full overflow-hidden"
-            style={{ backgroundColor: COLORS.gray200 }}
-          >
-            <View
-              className="h-full rounded-full"
-              style={{
-                width: `${usedPercent}%`,
-                backgroundColor: usedPercent > 80 ? COLORS.error : color,
-              }}
-            />
-          </View>
-        </View>
-      )}
     </View>
   );
 }

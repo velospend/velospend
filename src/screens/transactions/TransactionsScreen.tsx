@@ -140,7 +140,7 @@ export default function TransactionsScreen() {
 
       {/* Header */}
       <View
-        className="px-5 pt-14 pb-4"
+        className="px-5 pt-14 pb-5"
         style={{ backgroundColor: COLORS.primary }}
       >
         <View className="flex-row items-center justify-between">
@@ -174,7 +174,7 @@ export default function TransactionsScreen() {
         </View>
 
         {/* Summary Row */}
-        <View className="flex-row mt-4 gap-2">
+        <View className="flex-row mt-4">
           <SummaryChip
             label="Income"
             amount={summary.income}
@@ -319,14 +319,14 @@ export default function TransactionsScreen() {
         onSelectCategory={setSelectedCategoryId}
         onStartDatePress={() => setShowStartPicker(true)}
         onEndDatePress={() => setShowEndPicker(true)}
-        onStartDateChange={(date) => {
-          setShowStartPicker(false);
-          if (date) setStartDate(date);
-        }}
-        onEndDateChange={(date) => {
-          setShowEndPicker(false);
-          if (date) setEndDate(date);
-        }}
+        onStartDateChange={(date: Date | undefined) => {
+  setShowStartPicker(false);
+  if (date) setStartDate(date);
+}}
+        onEndDateChange={(date: Date | undefined) => {
+  setShowEndPicker(false);
+  if (date) setEndDate(date);
+}}
         onClear={clearFilters}
         onClose={() => setShowFilterModal(false)}
       />
@@ -339,8 +339,12 @@ export default function TransactionsScreen() {
 function SummaryChip({ label, amount, color }: { label: string; amount: number; color: string }) {
   return (
     <View
-      className="flex-1 rounded-xl px-3 py-2"
-      style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
+      className="rounded-xl px-3 py-2"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.15)",
+        marginRight: 8,
+        minWidth: 110,
+      }}
     >
       <Text className="text-white text-xs opacity-80">{label}</Text>
       <Text className="text-white text-sm font-bold">
@@ -482,7 +486,7 @@ function FilterModal({
               Account
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-              <View className="flex-row gap-2">
+              <View className="flex-row">
                 <FilterChip
                   label="All"
                   isSelected={!selectedAccountId}
@@ -504,7 +508,7 @@ function FilterModal({
               Category
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-              <View className="flex-row gap-2">
+              <View className="flex-row">
                 <FilterChip
                   label="All"
                   isSelected={!selectedCategoryId}
@@ -566,7 +570,7 @@ function FilterModal({
                 value={startDate || new Date()}
                 mode="date"
                 display="default"
-                onChange={(_, date) => onStartDateChange(date)}
+                onChange={(_, date: Date | undefined) => onStartDateChange(date)}
               />
             )}
 
@@ -575,7 +579,7 @@ function FilterModal({
                 value={endDate || new Date()}
                 mode="date"
                 display="default"
-                onChange={(_, date) => onEndDateChange(date)}
+                onChange={(_, date: Date | undefined) => onEndDateChange(date)}
               />
             )}
 
