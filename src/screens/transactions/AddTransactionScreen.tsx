@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
-import { createTransaction, getPreviousNotes } from "../../database/queries/transactions";
+import { getTransactionById, updateTransaction, getPreviousNotes, createTransaction } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
 import { getPlannersByUser } from "../../database/queries/planners";
@@ -24,6 +24,7 @@ import ModalSelector, { ModalOption } from "../../components/common/ModalSelecto
 import NoteInput from "../../components/common/NoteInput";
 import { getDatabase } from "../../database/db";
 import uuid from "react-native-uuid";
+import { useRoute, RouteProp } from "@react-navigation/native";
 
 const TRANSACTION_TYPES: {
   value: TransactionType;
@@ -39,6 +40,9 @@ const TRANSACTION_TYPES: {
 
 export default function AddTransactionScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const transactionId = (route.params as any)?.transactionId;
+  const isEditing = !!transactionId;
   const { user, loadAccounts } = useUserStore();
 
   // ─── Type ──────────────────────────────────────────────────────────────────
@@ -92,9 +96,50 @@ export default function AddTransactionScreen() {
     if (type === "self_transfer") return;
     const catType = type === "investment" ? "investment" : type === "income" ? "income" : "expense";
     setCategories(getCategoriesByUser(user.id, catType));
+    if (!isEditing) {
     setSelectedCategory(null);
     setSelectedPlanner(null);
+  }
   }, [type, user]);
+
+  // pre-fill data if editing
+useEffect(() => {
+  if (!isEditing || !user) return;
+
+  const txn = getTransactionById(transactionId);
+  if (!txn) return;
+
+  setType(txn.type);
+  setAmount(txn.amount.toString());
+  setDateTime(new Date(txn.dateTime));
+  setNote(txn.note || "");
+  setDescription(txn.description || "");
+
+  // set account
+  const allAccounts = getAccountsByUser(user.id);
+  const acc = allAccounts.find((a) => a.id === txn.accountId);
+  if (acc) setSelectedAccount(acc);
+
+  // set to account for transfer
+  if (txn.toAccountId) {
+    const toAcc = allAccounts.find((a) => a.id === txn.toAccountId);
+    if (toAcc) setSelectedToAccount(toAcc);
+  }
+
+  // set category
+  const catType = txn.type === "investment" ? "investment" : txn.type === "income" ? "income" : "expense";
+  const allCategories = getCategoriesByUser(user.id, catType);
+  setCategories(allCategories);
+  const cat = allCategories.find((c) => c.id === txn.categoryId);
+  if (cat) setSelectedCategory(cat);
+
+  // set planner
+  const allPlanners = getPlannersByUser(user.id);
+  setPlanners(allPlanners);
+  const planner = allPlanners.find((p) => p.id === txn.plannerId);
+  if (planner) setSelectedPlanner(planner);
+
+}, [isEditing, transactionId, user]);
 
   // ─── Modal Options ─────────────────────────────────────────────────────────
 
@@ -142,35 +187,48 @@ export default function AddTransactionScreen() {
   // ─── Save ──────────────────────────────────────────────────────────────────
 
   const handleSave = () => {
-    if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid amount.");
-      return;
-    }
-    if (!selectedAccount) {
-      Alert.alert("No Account", "Please select an account.");
-      return;
-    }
-    if (type === "self_transfer" && !selectedToAccount) {
-      Alert.alert("No Destination", "Please select a destination account.");
-      return;
-    }
-    if (type !== "self_transfer" && !selectedCategory) {
-      Alert.alert("No Category", "Please select a category.");
-      return;
-    }
-    if (type === "self_transfer" && selectedAccount.id === selectedToAccount?.id) {
-      Alert.alert("Same Account", "From and To accounts cannot be the same.");
-      return;
-    }
+  if (!amount || parseFloat(amount) <= 0) {
+    Alert.alert("Invalid Amount", "Please enter a valid amount.");
+    return;
+  }
+  if (!selectedAccount) {
+    Alert.alert("No Account", "Please select an account.");
+    return;
+  }
+  if (type === "self_transfer" && !selectedToAccount) {
+    Alert.alert("No Destination", "Please select a destination account.");
+    return;
+  }
+  if (type !== "self_transfer" && !selectedCategory) {
+    Alert.alert("No Category", "Please select a category.");
+    return;
+  }
+  if (type === "self_transfer" && selectedAccount.id === selectedToAccount?.id) {
+    Alert.alert("Same Account", "From and To accounts cannot be the same.");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      // auto add category to planner if needed
+    if (isEditing) {
+      updateTransaction(transactionId, {
+        type,
+        accountId: selectedAccount.id,
+        toAccountId: selectedToAccount?.id,
+        categoryId: selectedCategory?.id || "",
+        plannerId: selectedPlanner?.id,
+        amount: parseFloat(amount),
+        dateTime: dateTime.toISOString(),
+        note: note.trim() || undefined,
+        description: description.trim() || undefined,
+        isArchived: false,
+        userId: user!.id,
+      });
+    } else {
       if (selectedPlanner && selectedCategory) {
         ensurePlannerRecord(selectedPlanner.id, selectedCategory.id);
       }
-
       createTransaction({
         userId: user!.id,
         type,
@@ -184,15 +242,16 @@ export default function AddTransactionScreen() {
         description: description.trim() || undefined,
         isArchived: false,
       });
-
-      loadAccounts();
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert("Error", "Could not save transaction. Please try again.");
-    } finally {
-      setLoading(false);
     }
-  };
+
+    loadAccounts();
+    navigation.goBack();
+  } catch (error) {
+    Alert.alert("Error", "Could not save transaction. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -216,12 +275,14 @@ export default function AddTransactionScreen() {
             >
               <MaterialCommunityIcons name="arrow-left" size={22} color="white" />
             </TouchableOpacity>
-            <Text className="text-white text-xl font-bold">Add Transaction</Text>
+            <Text className="text-white text-xl font-bold">
+  {isEditing ? "Edit Transaction" : "Add Transaction"}
+</Text>
           </View>
         </View>
 
         {/* Type Selector */}
-        <View className="flex-row mt-4 gap-2">
+        <View className="flex-row gap-1" style={{ marginTop: 6 }}>
           {TRANSACTION_TYPES.map((t) => {
             const isSelected = type === t.value;
             return (
@@ -588,8 +649,8 @@ export default function AddTransactionScreen() {
           }}
         >
           <Text className="text-white text-base font-bold">
-            {loading ? "Saving..." : "Save Transaction"}
-          </Text>
+  {loading ? "Saving..." : isEditing ? "Update Transaction" : "Save Transaction"}
+</Text>
         </TouchableOpacity>
       </ScrollView>
 

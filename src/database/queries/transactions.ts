@@ -163,3 +163,39 @@ export const getFilteredTransactions = (
   const rows = db.getAllSync<any>(query, params);
   return rows.map(mapTransaction);
 };
+
+export const getTransactionById = (id: string): Transaction | null => {
+  const db = getDatabase();
+  const row = db.getFirstSync<any>(
+    `SELECT * FROM transactions WHERE id = ?`,
+    [id]
+  );
+  if (!row) return null;
+  return mapTransaction(row);
+};
+
+export const updateTransaction = (
+  id: string,
+  data: Partial<Omit<Transaction, "id" | "createdAt">>
+): void => {
+  const db = getDatabase();
+  db.runSync(
+    `UPDATE transactions SET
+      type = ?, account_id = ?, to_account_id = ?, category_id = ?,
+      planner_id = ?, amount = ?, date_time = ?, note = ?,
+      description = ?
+     WHERE id = ?`,
+    [
+      data.type ?? "expense",
+      data.accountId ?? "",
+      data.toAccountId ?? null,
+      data.categoryId ?? "",
+      data.plannerId ?? null,
+      data.amount ?? 0,
+      data.dateTime ?? new Date().toISOString(),
+      data.note ?? null,
+      data.description ?? null,
+      id,
+    ]
+  );
+};
