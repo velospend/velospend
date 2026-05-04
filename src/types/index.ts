@@ -181,6 +181,9 @@ export type HomeStackParamList = {
   AddAccountScreen: undefined;
   EditAccountScreen: { accountId: string };
   AccountsScreen: undefined;
+  CategoriesScreen: undefined;
+  AddCategoryScreen: undefined;
+  EditCategoryScreen: { categoryId: string };
   MoreScreen: undefined;
 };
 

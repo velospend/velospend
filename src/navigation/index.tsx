@@ -26,6 +26,7 @@ import ProfileScreen from "../screens/more/ProfileScreen";
 import AccountsScreen from "../screens/more/AccountsScreen";
 import AddAccountScreen from "../screens/more/AddAccountScreen";
 import CategoriesScreen from "../screens/more/CategoriesScreen";
+import AddCategoryScreen from "../screens/more/AddCategoryScreen";
 import InvestmentsScreen from "../screens/more/InvestmentsScreen";
 import InvestmentDetailScreen from "../screens/more/InvestmentDetailScreen";
 import AddInvestmentScreen from "../screens/more/AddInvestmentScreen";
@@ -62,6 +63,9 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="AddAccountScreen" component={AddAccountScreen} />
       <HomeStack.Screen name="EditAccountScreen" component={AddAccountScreen} />
       <HomeStack.Screen name="AccountsScreen" component={AccountsScreen} />
+      <HomeStack.Screen name="CategoriesScreen" component={CategoriesScreen} />
+      <HomeStack.Screen name="AddCategoryScreen" component={AddCategoryScreen} />
+      <HomeStack.Screen name="EditCategoryScreen" component={AddCategoryScreen} />
       <HomeStack.Screen name="MoreScreen" component={MoreScreen} />
     </HomeStack.Navigator>
   );

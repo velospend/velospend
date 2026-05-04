@@ -216,3 +216,103 @@ export const CURRENCIES = [
 
 export const DEFAULT_CURRENCY = "INR";
 export const DEFAULT_CURRENCY_SYMBOL = "₹";
+
+// ─── Category Icons ───────────────────────────────────────────────────────────
+
+export const CATEGORY_ICONS = [
+  // Food & Drink
+  { name: "food", label: "Food" },
+  { name: "food-fork-drink", label: "Restaurant" },
+  { name: "coffee", label: "Coffee" },
+  { name: "pizza", label: "Pizza" },
+  { name: "beer", label: "Beer" },
+
+  // Transport
+  { name: "car", label: "Car" },
+  { name: "bus", label: "Bus" },
+  { name: "train", label: "Train" },
+  { name: "airplane", label: "Flight" },
+  { name: "motorbike", label: "Bike" },
+  { name: "taxi", label: "Taxi" },
+
+  // Shopping
+  { name: "shopping", label: "Shopping" },
+  { name: "cart", label: "Cart" },
+  { name: "hanger", label: "Clothing" },
+  { name: "shoe-formal", label: "Shoes" },
+
+  // Home
+  { name: "home", label: "Home" },
+  { name: "sofa", label: "Furniture" },
+  { name: "lightbulb", label: "Electricity" },
+  { name: "water", label: "Water" },
+  { name: "gas-cylinder", label: "Gas" },
+
+  // Health
+  { name: "heart", label: "Health" },
+  { name: "hospital-box", label: "Medical" },
+  { name: "pill", label: "Medicine" },
+  { name: "dumbbell", label: "Gym" },
+  { name: "run", label: "Running" },
+
+  // Entertainment
+  { name: "movie", label: "Movies" },
+  { name: "music", label: "Music" },
+  { name: "gamepad-variant", label: "Gaming" },
+  { name: "television", label: "TV" },
+  { name: "book-open-variant", label: "Books" },
+
+  // Education
+  { name: "school", label: "School" },
+  { name: "laptop", label: "Laptop" },
+  { name: "pen", label: "Stationery" },
+
+  // Finance
+  { name: "cash", label: "Cash" },
+  { name: "credit-card", label: "Card" },
+  { name: "bank", label: "Bank" },
+  { name: "chart-line", label: "Stocks" },
+  { name: "trending-up", label: "Investment" },
+  { name: "piggy-bank", label: "Savings" },
+  { name: "bitcoin", label: "Crypto" },
+
+  // Personal
+  { name: "face-man", label: "Personal" },
+  { name: "gift", label: "Gift" },
+  { name: "briefcase", label: "Work" },
+  { name: "phone", label: "Phone" },
+  { name: "dog", label: "Pet" },
+  { name: "baby-carriage", label: "Baby" },
+
+  // Other
+  { name: "dots-horizontal", label: "Other" },
+  { name: "star", label: "Star" },
+  { name: "fire", label: "Fire" },
+  { name: "leaf", label: "Nature" },
+  { name: "tools", label: "Tools" },
+] as const;
+
+// ─── Category Colors ──────────────────────────────────────────────────────────
+
+export const CATEGORY_COLORS = [
+  "#E74C3C", // Red
+  "#E67E22", // Orange
+  "#F39C12", // Yellow
+  "#2ECC71", // Green
+  "#1ABC9C", // Teal
+  "#3498DB", // Blue
+  "#2980B9", // Dark Blue
+  "#9B59B6", // Purple
+  "#8E44AD", // Dark Purple
+  "#FF6584", // Pink
+  "#FF8C94", // Light Pink
+  "#6C63FF", // Indigo
+  "#00BCD4", // Cyan
+  "#009688", // Dark Teal
+  "#4CAF50", // Light Green
+  "#FF5722", // Deep Orange
+  "#795548", // Brown
+  "#607D8B", // Blue Grey
+  "#95A5A6", // Grey
+  "#34495E", // Dark Grey
+] as const;
