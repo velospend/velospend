@@ -77,6 +77,10 @@ function PlannerStackNavigator() {
       <PlannerStack.Screen name="PlannersScreen" component={PlannersScreen} />
       <PlannerStack.Screen name="PlannerDetailScreen" component={PlannerDetailScreen} />
       <PlannerStack.Screen name="AddPlannerScreen" component={AddPlannerScreen} />
+      <PlannerStack.Screen name="EditPlannerScreen" component={AddPlannerScreen} />
+      <PlannerStack.Screen name="AddPlannerRecordScreen" component={AddPlannerScreen} />
+      <PlannerStack.Screen name="EditPlannerRecordScreen" component={AddPlannerScreen} />
+      <PlannerStack.Screen name="PlannerRecordDetailScreen" component={PlannerDetailScreen} />
     </PlannerStack.Navigator>
   );
 }
