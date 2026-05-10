@@ -32,6 +32,7 @@ import InvestmentDetailScreen from "../screens/more/InvestmentDetailScreen";
 import AddInvestmentScreen from "../screens/more/AddInvestmentScreen";
 import RecurringRemindersScreen from "../screens/more/RecurringRemindersScreen";
 import SettingsScreen from "../screens/more/SettingsScreen";
+import PlannerTransactionsScreen from "../screens/planners/PlannerTransactionsScreen";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 import {
@@ -78,9 +79,7 @@ function PlannerStackNavigator() {
       <PlannerStack.Screen name="PlannerDetailScreen" component={PlannerDetailScreen} />
       <PlannerStack.Screen name="AddPlannerScreen" component={AddPlannerScreen} />
       <PlannerStack.Screen name="EditPlannerScreen" component={AddPlannerScreen} />
-      <PlannerStack.Screen name="AddPlannerRecordScreen" component={AddPlannerScreen} />
-      <PlannerStack.Screen name="EditPlannerRecordScreen" component={AddPlannerScreen} />
-      <PlannerStack.Screen name="PlannerRecordDetailScreen" component={PlannerDetailScreen} />
+      <PlannerStack.Screen name="PlannerTransactionsScreen" component={PlannerTransactionsScreen} />
     </PlannerStack.Navigator>
   );
 }

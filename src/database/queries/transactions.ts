@@ -81,6 +81,26 @@ export const getTransactionsByPlanner = (
 
 export const deleteTransaction = (id: string): void => {
   const db = getDatabase();
+
+  // get transaction before deleting to reverse balance
+  const txn = db.getFirstSync<any>(
+    `SELECT * FROM transactions WHERE id = ?`, [id]
+  );
+
+  if (txn) {
+    // reverse the balance effect
+    if (txn.type === "expense" || txn.type === "investment") {
+      updateAccountBalance(txn.account_id, txn.amount, "add");
+    } else if (txn.type === "income") {
+      updateAccountBalance(txn.account_id, txn.amount, "subtract");
+    } else if (txn.type === "self_transfer") {
+      updateAccountBalance(txn.account_id, txn.amount, "add");
+      if (txn.to_account_id) {
+        updateAccountBalance(txn.to_account_id, txn.amount, "subtract");
+      }
+    }
+  }
+
   db.runSync(`DELETE FROM transactions WHERE id = ?`, [id]);
 };
 
@@ -179,6 +199,27 @@ export const updateTransaction = (
   data: Partial<Omit<Transaction, "id" | "createdAt">>
 ): void => {
   const db = getDatabase();
+
+  // get old transaction to reverse its balance effect first
+  const old = db.getFirstSync<any>(
+    `SELECT * FROM transactions WHERE id = ?`, [id]
+  );
+
+  if (old) {
+    // reverse old balance effect
+    if (old.type === "expense" || old.type === "investment") {
+      updateAccountBalance(old.account_id, old.amount, "add");
+    } else if (old.type === "income") {
+      updateAccountBalance(old.account_id, old.amount, "subtract");
+    } else if (old.type === "self_transfer") {
+      updateAccountBalance(old.account_id, old.amount, "add");
+      if (old.to_account_id) {
+        updateAccountBalance(old.to_account_id, old.amount, "subtract");
+      }
+    }
+  }
+
+  // update transaction in DB
   db.runSync(
     `UPDATE transactions SET
       type = ?, account_id = ?, to_account_id = ?, category_id = ?,
@@ -198,4 +239,16 @@ export const updateTransaction = (
       id,
     ]
   );
+
+  // apply new balance effect
+  if (data.type === "expense" || data.type === "investment") {
+    updateAccountBalance(data.accountId!, data.amount!, "subtract");
+  } else if (data.type === "income") {
+    updateAccountBalance(data.accountId!, data.amount!, "add");
+  } else if (data.type === "self_transfer") {
+    updateAccountBalance(data.accountId!, data.amount!, "subtract");
+    if (data.toAccountId) {
+      updateAccountBalance(data.toAccountId, data.amount!, "add");
+    }
+  }
 };

@@ -190,11 +190,17 @@ export type HomeStackParamList = {
 export type PlannerStackParamList = {
   PlannersScreen: undefined;
   PlannerDetailScreen: { plannerId: string };
-  PlannerRecordDetailScreen: { plannerRecordId: string; plannerId: string };
   AddPlannerScreen: undefined;
   EditPlannerScreen: { plannerId: string };
   AddPlannerRecordScreen: { plannerId: string };
-  EditPlannerRecordScreen: { plannerRecordId: string };
+  EditPlannerRecordScreen: { plannerRecordId: string; plannerId: string };
+  PlannerRecordDetailScreen: { plannerRecordId: string; plannerId: string };
+  PlannerTransactionsScreen: {
+    plannerId: string;
+    categoryId: string;
+    categoryName: string;
+    plannerTitle: string;
+  };
 };
 
 export type MoreStackParamList = {

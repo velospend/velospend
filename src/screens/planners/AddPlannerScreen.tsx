@@ -126,14 +126,14 @@ export default function AddPlannerScreen() {
         </View>
 
         {/* Type Selector */}
-        <View className="flex-row mt-4 gap-3">
+        <View className="flex-row gap-3" style={{ marginTop: 6 }}>
           {PLANNER_TYPES.map((t) => {
             const isSelected = type === t.value;
             return (
               <TouchableOpacity
                 key={t.value}
                 onPress={() => setType(t.value)}
-                className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl gap-2"
+                className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl"
                 style={{
                   backgroundColor: isSelected
                     ? "rgba(255,255,255,0.3)"

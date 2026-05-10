@@ -286,17 +286,14 @@ export default function PlannerDetailScreen() {
               plannerType={planner.type}
               onEdit={() => handleEditRecord(record)}
               onDelete={() => handleDeleteRecord(record)}
-              onViewTransactions={() => {
-                const txns = getTransactionsByPlanner(plannerId, record.categoryId);
-                Alert.alert(
-                  `${record.categoryName} Transactions`,
-                  txns.length === 0
-                    ? "No transactions linked to this category in this planner."
-                    : txns.map((t) =>
-                        `₹${t.amount} — ${new Date(t.dateTime).toLocaleDateString("en-IN")}`
-                      ).join("\n")
-                );
-              }}
+              onViewTransactions={() =>
+  navigation.navigate("PlannerTransactionsScreen", {
+    plannerId,
+    categoryId: record.categoryId,
+    categoryName: record.categoryName,
+    plannerTitle: planner.title,
+  })
+}
             />
           ))
         )}
