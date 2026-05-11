@@ -106,3 +106,52 @@ export const getInvestmentTransactions = (
     createdAt: row.created_at,
   }));
 };
+
+export const getInvestmentById = (id: string): Investment | null => {
+  const db = getDatabase();
+  const row = db.getFirstSync<any>(
+    `SELECT * FROM investments WHERE id = ?`, [id]
+  );
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    investmentName: row.investment_name,
+    type: row.type,
+    totalInvested: row.total_invested,
+    currentValue: row.current_value,
+    recurringType: row.recurring_type,
+    recurrencePeriod: row.recurrence_period ?? undefined,
+    note: row.note ?? undefined,
+    createdAt: row.created_at,
+  };
+};
+
+export const updateInvestment = (
+  id: string,
+  data: Partial<Omit<Investment, "id" | "createdAt">>
+): void => {
+  const db = getDatabase();
+  db.runSync(
+    `UPDATE investments SET investment_name = ?, type = ?, current_value = ?,
+     recurring_type = ?, recurrence_period = ?, note = ? WHERE id = ?`,
+    [
+      data.investmentName ?? "",
+      data.type ?? "sip",
+      data.currentValue ?? 0,
+      data.recurringType ?? "one_time",
+      data.recurrencePeriod ?? null,
+      data.note ?? null,
+      id,
+    ]
+  );
+};
+
+export const deleteInvestmentTransaction = (id: string, investmentId: string, amount: number): void => {
+  const db = getDatabase();
+  db.runSync(`DELETE FROM investment_transactions WHERE id = ?`, [id]);
+  db.runSync(
+    `UPDATE investments SET total_invested = total_invested - ? WHERE id = ?`,
+    [amount, investmentId]
+  );
+};

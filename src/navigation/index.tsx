@@ -67,6 +67,10 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="CategoriesScreen" component={CategoriesScreen} />
       <HomeStack.Screen name="AddCategoryScreen" component={AddCategoryScreen} />
       <HomeStack.Screen name="EditCategoryScreen" component={AddCategoryScreen} />
+      <HomeStack.Screen name="InvestmentsScreen" component={InvestmentsScreen} />
+      <HomeStack.Screen name="InvestmentDetailScreen" component={InvestmentDetailScreen} />
+      <HomeStack.Screen name="AddInvestmentScreen" component={AddInvestmentScreen} />
+      <HomeStack.Screen name="EditInvestmentScreen" component={AddInvestmentScreen} />
       <HomeStack.Screen name="MoreScreen" component={MoreScreen} />
     </HomeStack.Navigator>
   );
@@ -92,9 +96,13 @@ function MoreStackNavigator() {
       <MoreStack.Screen name="AccountsScreen" component={AccountsScreen} />
       <MoreStack.Screen name="AddAccountScreen" component={AddAccountScreen} />
       <MoreStack.Screen name="CategoriesScreen" component={CategoriesScreen} />
+      <MoreStack.Screen name="AddCategoryScreen" component={AddCategoryScreen} />
+      <MoreStack.Screen name="EditCategoryScreen" component={AddCategoryScreen} />
       <MoreStack.Screen name="InvestmentsScreen" component={InvestmentsScreen} />
       <MoreStack.Screen name="InvestmentDetailScreen" component={InvestmentDetailScreen} />
       <MoreStack.Screen name="AddInvestmentScreen" component={AddInvestmentScreen} />
+      <MoreStack.Screen name="EditInvestmentScreen" component={AddInvestmentScreen} />
+      <MoreStack.Screen name="AddInvestmentTransactionScreen" component={InvestmentDetailScreen} />
       <MoreStack.Screen name="RecurringRemindersScreen" component={RecurringRemindersScreen} />
       <MoreStack.Screen name="SettingsScreen" component={SettingsScreen} />
     </MoreStack.Navigator>
