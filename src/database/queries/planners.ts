@@ -152,13 +152,16 @@ export const updatePlannerRecord = (
 
 export const getUsedAmountForRecord = (
   plannerId: string,
-  categoryId: string
+  categoryId: string,
+  plannerType: string
 ): number => {
   const db = getDatabase();
+
+  // only sum transactions matching the planner type
   const row = db.getFirstSync<any>(
     `SELECT COALESCE(SUM(amount), 0) as total FROM transactions
-     WHERE planner_id = ? AND category_id = ? AND is_archived = 0`,
-    [plannerId, categoryId]
+     WHERE planner_id = ? AND category_id = ? AND type = ? AND is_archived = 0`,
+    [plannerId, categoryId, plannerType]
   );
   return row?.total ?? 0;
 };

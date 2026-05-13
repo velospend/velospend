@@ -61,12 +61,12 @@ export default function PlannersScreen() {
   };
 
   const getPlannerProgress = (planner: Planner) => {
-    const records = getPlannerRecords(planner.id);
-    const totalUsed = records.reduce((sum, record) => {
-      return sum + getUsedAmountForRecord(planner.id, record.categoryId);
-    }, 0);
-    return { totalUsed, totalPlanned: planner.totalPlanned };
-  };
+  const records = getPlannerRecords(planner.id);
+  const totalUsed = records.reduce((sum, record) => {
+    return sum + getUsedAmountForRecord(planner.id, record.categoryId, planner.type);
+  }, 0);
+  return { totalUsed, totalPlanned: planner.totalPlanned };
+};
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.background }}>

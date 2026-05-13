@@ -62,7 +62,7 @@ export const createTables = (): void => {
       type            TEXT NOT NULL,
       account_id      TEXT NOT NULL,
       to_account_id   TEXT,
-      category_id     TEXT NOT NULL,
+      category_id     TEXT,
       planner_id      TEXT,
       amount          REAL NOT NULL,
       date_time       TEXT NOT NULL,

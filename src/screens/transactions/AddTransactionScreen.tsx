@@ -158,7 +158,9 @@ useEffect(() => {
     color: cat.color,
   }));
 
-  const plannerOptions: ModalOption[] = planners.map((p) => ({
+  const plannerOptions: ModalOption[] = planners
+  .filter((p) => p.type === type)
+  .map((p) => ({
     id: p.id,
     label: p.title,
     subtitle: `${p.type} · ₹${p.totalPlanned.toLocaleString("en-IN")}`,
@@ -206,6 +208,24 @@ useEffect(() => {
   if (type === "self_transfer" && selectedAccount.id === selectedToAccount?.id) {
     Alert.alert("Same Account", "From and To accounts cannot be the same.");
     return;
+  }
+
+  // ─── Planner type validation ───────────────────────────────────────────────
+  if (selectedPlanner) {
+    if (type === "expense" && selectedPlanner.type !== "expense") {
+      Alert.alert(
+        "Wrong Planner Type",
+        "You selected an income planner for an expense transaction. Please select an expense planner or remove the planner."
+      );
+      return;
+    }
+    if (type === "income" && selectedPlanner.type !== "income") {
+      Alert.alert(
+        "Wrong Planner Type",
+        "You selected an expense planner for an income transaction. Please select an income planner or remove the planner."
+      );
+      return;
+    }
   }
 
   try {

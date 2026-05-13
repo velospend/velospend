@@ -17,7 +17,7 @@ export const createTransaction = (
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
     [
       id, data.userId, data.type, data.accountId,
-      data.toAccountId ?? null, data.categoryId,
+      data.toAccountId ?? null, data.categoryId || null,
       data.plannerId ?? null, data.amount, data.dateTime,
       data.note ?? null, data.description ?? null, createdAt,
     ]

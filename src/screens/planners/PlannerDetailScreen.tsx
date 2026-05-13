@@ -56,35 +56,40 @@ export default function PlannerDetailScreen() {
   const [savingRecord, setSavingRecord] = useState(false);
 
   const loadData = useCallback(() => {
-    if (!user) return;
-    const p = getPlannerById(plannerId);
-    if (!p) return;
-    setPlanner(p);
+  if (!user) return;
+  const p = getPlannerById(plannerId);
+  if (!p) return;
+  setPlanner(p);
 
-    const allCategories = getCategoriesByUser(user.id, p.type === "expense" ? "expense" : "income");
-    setCategoryOptions(
-      allCategories.map((c) => ({
+  // load ALL categories not just filtered by type
+  const allCategories = getCategoriesByUser(user.id);
+
+  setCategoryOptions(
+    allCategories
+      .filter((c) => c.type === (p.type === "expense" ? "expense" : "income"))
+      .map((c) => ({
         id: c.id,
         label: c.name,
         icon: c.icon,
         color: c.color,
       }))
-    );
+  );
 
-    const rawRecords = getPlannerRecords(plannerId);
-    const enriched: RecordWithMeta[] = rawRecords.map((r) => {
-      const cat = allCategories.find((c) => c.id === r.categoryId);
-      const usedAmount = getUsedAmountForRecord(plannerId, r.categoryId);
-      return {
-        ...r,
-        categoryName: cat?.name || "Unknown",
-        categoryIcon: cat?.icon || "tag",
-        categoryColor: cat?.color || COLORS.primary,
-        usedAmount,
-      };
-    });
-    setRecords(enriched);
-  }, [plannerId, user]);
+  const rawRecords = getPlannerRecords(plannerId);
+  const enriched: RecordWithMeta[] = rawRecords.map((r) => {
+    // search in ALL categories so nothing shows as Unknown
+    const cat = allCategories.find((c) => c.id === r.categoryId);
+    const usedAmount = getUsedAmountForRecord(plannerId, r.categoryId, p.type);
+    return {
+      ...r,
+      categoryName: cat?.name || "Unknown",
+      categoryIcon: cat?.icon || "tag",
+      categoryColor: cat?.color || COLORS.primary,
+      usedAmount,
+    };
+  });
+  setRecords(enriched);
+}, [plannerId, user]);
 
   useFocusEffect(
     useCallback(() => {
