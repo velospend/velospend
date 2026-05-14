@@ -179,7 +179,7 @@ export default function ReportsScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
       >
         {/* Summary Cards */}
-        <View className="flex-row flex-wrap gap-3 mb-4">
+        <View className="flex flex-row flex-wrap justify-between items-center mb-4">
           <SummaryCard
             label="Income"
             amount={summary.totalIncome}
@@ -548,7 +548,7 @@ function SummaryCard({
 }) {
   return (
     <View
-      className="rounded-2xl p-3"
+      className="rounded-2xl p-3 mb-4"
       style={{
         backgroundColor: COLORS.surface,
         width: (SCREEN_WIDTH - 48) / 2,
