@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
 import { updateUser } from "../../database/queries/users";
 import { useUserStore } from "../../store/useUserStore";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
+  const [showDobPicker, setShowDobPicker] = useState(false);
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
@@ -167,23 +169,68 @@ export default function ProfileScreen() {
                 icon="account"
                 value={name}
                 onChangeText={setName}
-                placeholder="e.g. Yash Gupta"
+                placeholder="e.g. Your Name"
               />
               <ProfileInput
                 label="Email Address"
                 icon="email"
                 value={email}
                 onChangeText={setEmail}
-                placeholder="e.g. yash@email.com"
+                placeholder="e.g. your@email.com"
                 keyboardType="email-address"
               />
-              <ProfileInput
-                label="Date of Birth"
-                icon="calendar"
-                value={dob}
-                onChangeText={setDob}
-                placeholder="e.g. 1995-04-15"
-              />
+<View className="mb-3">
+  <Text
+    className="text-xs font-semibold mb-1 ml-1"
+    style={{ color: COLORS.textSecondary }}
+  >
+    Date of Birth
+  </Text>
+  <TouchableOpacity
+    onPress={() => setShowDobPicker(true)}
+    className="flex-row items-center rounded-xl px-3 py-3"
+    style={{
+      backgroundColor: COLORS.gray100,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    }}
+  >
+    <MaterialCommunityIcons
+      name="calendar"
+      size={18}
+      color={COLORS.gray400}
+    />
+    <Text
+      className="flex-1 px-2 text-sm"
+      style={{ color: dob ? COLORS.textPrimary : COLORS.textMuted }}
+    >
+      {dob
+        ? new Date(dob).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : "Select date of birth"}
+    </Text>
+    <MaterialCommunityIcons
+      name="chevron-down"
+      size={18}
+      color={COLORS.gray400}
+    />
+  </TouchableOpacity>
+  {showDobPicker && (
+    <DateTimePicker
+      value={dob ? new Date(dob) : new Date(2000, 0, 1)}
+      mode="date"
+      display="default"
+      maximumDate={new Date()}
+      onChange={(_, date) => {
+        setShowDobPicker(false);
+        if (date) setDob(date.toISOString());
+      }}
+    />
+  )}
+</View>
               <ProfileInput
                 label="City"
                 icon="city"
@@ -251,10 +298,18 @@ export default function ProfileScreen() {
                 value={user?.email || "Not set"}
               />
               <ProfileRow
-                icon="calendar"
-                label="Date of Birth"
-                value={user?.dob || "Not set"}
-              />
+  icon="calendar"
+  label="Date of Birth"
+  value={
+    user?.dob
+      ? new Date(user.dob).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "Not set"
+  }
+/>
               <ProfileRow
                 icon="city"
                 label="City"
