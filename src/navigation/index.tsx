@@ -71,6 +71,7 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="InvestmentDetailScreen" component={InvestmentDetailScreen} />
       <HomeStack.Screen name="AddInvestmentScreen" component={AddInvestmentScreen} />
       <HomeStack.Screen name="EditInvestmentScreen" component={AddInvestmentScreen} />
+      <HomeStack.Screen name="ProfileScreen" component={ProfileScreen} />
       <HomeStack.Screen name="MoreScreen" component={MoreScreen} />
     </HomeStack.Navigator>
   );

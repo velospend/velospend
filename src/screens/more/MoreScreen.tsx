@@ -35,8 +35,8 @@ const MENU_SECTIONS = [
   {
     title: "Account",
     items: [
-      { id: "profile", label: "Profile", icon: "account-circle", color: "#9B59B6", screen: "AddAccountScreen" },
-      { id: "settings", label: "Settings", icon: "cog", color: "#95A5A6", screen: "AddAccountScreen" },
+      { id: "profile", label: "Profile", icon: "account-circle", color: "#9B59B6", screen: "ProfileScreen" },
+      { id: "settings", label: "Settings", icon: "cog", color: "#95A5A6", screen: "SettingsScreen" },
     ],
   },
 ];

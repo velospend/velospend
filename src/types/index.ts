@@ -188,6 +188,7 @@ export type HomeStackParamList = {
   InvestmentDetailScreen: { investmentId: string };
   AddInvestmentScreen: undefined;
   EditInvestmentScreen: { investmentId: string };
+  ProfileScreen: undefined;
   MoreScreen: undefined;
 };
 
