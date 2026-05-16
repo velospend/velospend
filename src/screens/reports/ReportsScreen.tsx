@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { BarChart } from "react-native-chart-kit";
+import Svg, { Rect, Text as SvgText, G, Circle, Path } from "react-native-svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
 import {
@@ -207,51 +207,32 @@ export default function ReportsScreen() {
         </View>
 
         {/* Income vs Expense Bar Chart */}
-        {monthlySummary.length > 0 && (
-          <View
-            className="rounded-2xl p-4 mb-4"
-            style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
-          >
-            <Text
-              className="text-sm font-bold mb-3"
-              style={{ color: COLORS.textPrimary }}
-            >
-              Income vs Expense
-            </Text>
-            <BarChart
-              data={barChartData}
-              width={SCREEN_WIDTH - 64}
-              height={200}
-              yAxisLabel="₹"
-              yAxisSuffix=""
-              chartConfig={{
-                backgroundColor: COLORS.surface,
-                backgroundGradientFrom: COLORS.surface,
-                backgroundGradientTo: COLORS.surface,
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(108, 99, 255, ${opacity})`,
-                labelColor: () => COLORS.textMuted,
-                style: { borderRadius: 16 },
-                barPercentage: 0.5,
-              }}
-              style={{ borderRadius: 12 }}
-              showValuesOnTopOfBars={false}
-              withInnerLines={false}
-            />
-
-            {/* Legend */}
-            <View className="flex-row justify-center gap-4 mt-2">
-              <View className="flex-row items-center gap-1">
-                <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.income }} />
-                <Text className="text-xs" style={{ color: COLORS.textMuted }}>Income</Text>
-              </View>
-              <View className="flex-row items-center gap-1">
-                <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.expense }} />
-                <Text className="text-xs" style={{ color: COLORS.textMuted }}>Expense</Text>
-              </View>
-            </View>
-          </View>
-        )}
+        {/* Income vs Expense Bar Chart */}
+{monthlySummary.length > 0 && (
+  <View
+    className="rounded-2xl p-4 mb-4"
+    style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+  >
+    <Text
+      className="text-sm font-bold mb-4"
+      style={{ color: COLORS.textPrimary }}
+    >
+      Income vs Expense
+    </Text>
+    <CustomBarChart data={monthlySummary} />
+    {/* Legend */}
+    <View className="flex-row justify-center gap-4 mt-3">
+      <View className="flex-row items-center gap-1">
+        <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.income }} />
+        <Text className="text-xs" style={{ color: COLORS.textMuted }}>Income</Text>
+      </View>
+      <View className="flex-row items-center gap-1">
+        <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.expense }} />
+        <Text className="text-xs" style={{ color: COLORS.textMuted }}>Expense</Text>
+      </View>
+    </View>
+  </View>
+)}
 
         {/* Category Breakdown */}
         <View
@@ -587,41 +568,77 @@ function SummaryCard({
 function DonutChart({ categories }: { categories: CategorySummary[] }) {
   const total = categories.reduce((sum, c) => sum + c.total, 0);
   const top5 = categories.slice(0, 5);
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 60;
+  const innerRadius = 38;
+
+  // calculate segments
+  let currentAngle = -90;
+  const segments = top5.map((cat) => {
+    const percentage = cat.total / total;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + percentage * 360;
+    currentAngle = endAngle;
+
+    const start = polarToCartesian(cx, cy, radius, startAngle);
+    const end = polarToCartesian(cx, cy, radius, endAngle);
+    const largeArc = percentage > 0.5 ? 1 : 0;
+
+    const innerStart = polarToCartesian(cx, cy, innerRadius, endAngle);
+    const innerEnd = polarToCartesian(cx, cy, innerRadius, startAngle);
+
+    const d = [
+      `M ${start.x} ${start.y}`,
+      `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`,
+      `L ${innerStart.x} ${innerStart.y}`,
+      `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerEnd.x} ${innerEnd.y}`,
+      "Z",
+    ].join(" ");
+
+    return { ...cat, d };
+  });
 
   return (
     <View>
-      {/* Simple donut using SVG-like approach with segments */}
       <View className="items-center mb-4">
-        <View
-          className="w-40 h-40 rounded-full items-center justify-center"
-          style={{ backgroundColor: COLORS.gray100 }}
-        >
-          {/* Center text */}
-          <Text className="text-xs" style={{ color: COLORS.textMuted }}>Total</Text>
-          <Text
-            className="text-base font-bold"
-            style={{ color: COLORS.textPrimary }}
-            numberOfLines={1}
+        <Svg width={size} height={size}>
+          {segments.map((seg, i) => (
+            <Path key={i} d={seg.d} fill={seg.categoryColor} />
+          ))}
+          {/* Center */}
+          <Circle cx={cx} cy={cy} r={innerRadius - 2} fill={COLORS.surface} />
+          <SvgText
+            x={cx}
+            y={cy - 6}
+            fontSize="10"
+            fill={COLORS.textMuted}
+            textAnchor="middle"
           >
-            ₹{total.toLocaleString("en-IN")}
-          </Text>
-        </View>
+            Total
+          </SvgText>
+          <SvgText
+            x={cx}
+            y={cy + 10}
+            fontSize="11"
+            fontWeight="bold"
+            fill={COLORS.textPrimary}
+            textAnchor="middle"
+          >
+            ₹{(total / 1000).toFixed(0)}k
+          </SvgText>
+        </Svg>
       </View>
 
       {/* Legend */}
       {top5.map((cat) => (
-        <View
-          key={cat.categoryId}
-          className="flex-row items-center mb-2"
-        >
+        <View key={cat.categoryId} className="flex-row items-center mb-2">
           <View
             className="w-3 h-3 rounded-full mr-2"
             style={{ backgroundColor: cat.categoryColor }}
           />
-          <Text
-            className="flex-1 text-sm"
-            style={{ color: COLORS.textPrimary }}
-          >
+          <Text className="flex-1 text-sm" style={{ color: COLORS.textPrimary }}>
             {cat.categoryName}
           </Text>
           <Text className="text-sm font-bold" style={{ color: COLORS.textPrimary }}>
@@ -631,6 +648,21 @@ function DonutChart({ categories }: { categories: CategorySummary[] }) {
       ))}
     </View>
   );
+}
+
+// ─── Helper ───────────────────────────────────────────────────────────────────
+
+function polarToCartesian(
+  cx: number,
+  cy: number,
+  r: number,
+  angleDeg: number
+) {
+  const rad = ((angleDeg - 0) * Math.PI) / 180;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad),
+  };
 }
 
 // ─── Horizontal Bar Chart ─────────────────────────────────────────────────────
@@ -686,5 +718,107 @@ function HorizontalBarChart({ categories }: { categories: CategorySummary[] }) {
         </View>
       ))}
     </View>
+  );
+}
+
+// ─── Custom Bar Chart ─────────────────────────────────────────────────────────
+
+function CustomBarChart({ data }: { data: MonthlySummary[] }) {
+  const chartWidth = SCREEN_WIDTH - 64;
+  const chartHeight = 180;
+  const paddingLeft = 50;
+  const paddingBottom = 30;
+  const paddingTop = 10;
+  const barAreaWidth = chartWidth - paddingLeft;
+  const barAreaHeight = chartHeight - paddingBottom - paddingTop;
+
+  const maxValue = Math.max(
+    ...data.map((d) => Math.max(d.income, d.expense)),
+    1
+  );
+
+  const barGroupWidth = barAreaWidth / data.length;
+  const barWidth = Math.min((barGroupWidth - 8) / 2, 20);
+
+  // y axis labels
+  const yLabels = [0, 0.25, 0.5, 0.75, 1].map((ratio) =>
+    Math.round(maxValue * ratio)
+  );
+
+  return (
+    <Svg width={chartWidth} height={chartHeight}>
+      {/* Y axis labels and grid lines */}
+      {yLabels.map((val, i) => {
+        const y = paddingTop + barAreaHeight - (val / maxValue) * barAreaHeight;
+        return (
+          <G key={i}>
+            <SvgText
+              x={paddingLeft - 6}
+              y={y + 4}
+              fontSize="9"
+              fill={COLORS.textMuted}
+              textAnchor="end"
+            >
+              {val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}
+            </SvgText>
+            <Rect
+              x={paddingLeft}
+              y={y}
+              width={barAreaWidth}
+              height={0.5}
+              fill={COLORS.border}
+            />
+          </G>
+        );
+      })}
+
+      {/* Bars */}
+      {data.map((item, index) => {
+        const groupX = paddingLeft + index * barGroupWidth + (barGroupWidth - barWidth * 2 - 4) / 2;
+
+        const incomeHeight = Math.max((item.income / maxValue) * barAreaHeight, 2);
+        const expenseHeight = Math.max((item.expense / maxValue) * barAreaHeight, 2);
+
+        const incomeY = paddingTop + barAreaHeight - incomeHeight;
+        const expenseY = paddingTop + barAreaHeight - expenseHeight;
+
+        const [year, month] = item.month.split("-");
+        const label = new Date(parseInt(year), parseInt(month) - 1)
+          .toLocaleDateString("en-IN", { month: "short" });
+
+        return (
+          <G key={index}>
+            {/* Income bar */}
+            <Rect
+              x={groupX}
+              y={incomeY}
+              width={barWidth}
+              height={incomeHeight}
+              fill={COLORS.income}
+              rx={3}
+            />
+            {/* Expense bar */}
+            <Rect
+              x={groupX + barWidth + 4}
+              y={expenseY}
+              width={barWidth}
+              height={expenseHeight}
+              fill={COLORS.expense}
+              rx={3}
+            />
+            {/* X label */}
+            <SvgText
+              x={groupX + barWidth + 2}
+              y={chartHeight - 8}
+              fontSize="9"
+              fill={COLORS.textMuted}
+              textAnchor="middle"
+            >
+              {label}
+            </SvgText>
+          </G>
+        );
+      })}
+    </Svg>
   );
 }

@@ -232,37 +232,41 @@ useEffect(() => {
     setLoading(true);
 
     if (isEditing) {
-      updateTransaction(transactionId, {
-        type,
-        accountId: selectedAccount.id,
-        toAccountId: selectedToAccount?.id,
-        categoryId: selectedCategory?.id || "",
-        plannerId: selectedPlanner?.id,
-        amount: parseFloat(amount),
-        dateTime: dateTime.toISOString(),
-        note: note.trim() || undefined,
-        description: description.trim() || undefined,
-        isArchived: false,
-        userId: user!.id,
-      });
-    } else {
-      if (selectedPlanner && selectedCategory) {
-        ensurePlannerRecord(selectedPlanner.id, selectedCategory.id);
-      }
-      createTransaction({
-        userId: user!.id,
-        type,
-        accountId: selectedAccount.id,
-        toAccountId: selectedToAccount?.id,
-        categoryId: selectedCategory?.id || "",
-        plannerId: selectedPlanner?.id,
-        amount: parseFloat(amount),
-        dateTime: dateTime.toISOString(),
-        note: note.trim() || undefined,
-        description: description.trim() || undefined,
-        isArchived: false,
-      });
-    }
+  // auto create planner record if needed when editing too
+  if (selectedPlanner && selectedCategory) {
+    ensurePlannerRecord(selectedPlanner.id, selectedCategory.id);
+  }
+  updateTransaction(transactionId, {
+    type,
+    accountId: selectedAccount.id,
+    toAccountId: selectedToAccount?.id,
+    categoryId: selectedCategory?.id || "",
+    plannerId: selectedPlanner?.id,
+    amount: parseFloat(amount),
+    dateTime: dateTime.toISOString(),
+    note: note.trim() || undefined,
+    description: description.trim() || undefined,
+    isArchived: false,
+    userId: user!.id,
+  });
+} else {
+  if (selectedPlanner && selectedCategory) {
+    ensurePlannerRecord(selectedPlanner.id, selectedCategory.id);
+  }
+  createTransaction({
+    userId: user!.id,
+    type,
+    accountId: selectedAccount.id,
+    toAccountId: selectedToAccount?.id,
+    categoryId: selectedCategory?.id || "",
+    plannerId: selectedPlanner?.id,
+    amount: parseFloat(amount),
+    dateTime: dateTime.toISOString(),
+    note: note.trim() || undefined,
+    description: description.trim() || undefined,
+    isArchived: false,
+  });
+}
 
     loadAccounts();
     navigation.goBack();
