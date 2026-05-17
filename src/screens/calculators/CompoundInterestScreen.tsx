@@ -12,6 +12,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 
 const COMPOUND_FREQUENCIES = [
   { label: "Yearly", value: 1 },
@@ -22,6 +23,7 @@ const COMPOUND_FREQUENCIES = [
 
 export default function CompoundInterestScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
 
   const [principal, setPrincipal] = useState("");
   const [rate, setRate] = useState("");
@@ -118,9 +120,9 @@ export default function CompoundInterestScreen() {
           className="rounded-2xl p-4 mb-4"
           style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
         >
-          <CalcInput label="Principal Amount (₹)" value={principal} onChangeText={setPrincipal} placeholder="e.g. 10000" color={color} />
-          <CalcInput label="Annual Rate of Interest (%)" value={rate} onChangeText={setRate} placeholder="e.g. 8" color={color} />
-          <CalcInput label="Time Period (Years)" value={time} onChangeText={setTime} placeholder="e.g. 5" color={color} />
+          <CalcInput label="Principal Amount (₹)" value={principal} onChangeText={setPrincipal} placeholder="e.g. 10000" colors={COLORS} />
+          <CalcInput label="Annual Rate of Interest (%)" value={rate} onChangeText={setRate} placeholder="e.g. 8" colors={COLORS} />
+          <CalcInput label="Time Period (Years)" value={time} onChangeText={setTime} placeholder="e.g. 5" colors={COLORS} />
 
           {/* Compounding Frequency */}
           <Text className="text-sm font-semibold mb-2" style={{ color: COLORS.textSecondary }}>
@@ -170,22 +172,22 @@ export default function CompoundInterestScreen() {
   );
 }
 
-function CalcInput({ label, value, onChangeText, placeholder, color }: any) {
+function CalcInput({ label, value, onChangeText, placeholder, colors }: any) {
   return (
     <View className="mb-3">
-      <Text className="text-sm font-semibold mb-2" style={{ color: COLORS.textSecondary }}>{label}</Text>
+      <Text className="text-sm font-semibold mb-2" style={{ color: colors.textSecondary }}>{label}</Text>
       <View
         className="flex-row items-center rounded-xl px-3"
-        style={{ backgroundColor: COLORS.gray100, borderWidth: 1, borderColor: COLORS.border }}
+        style={{ backgroundColor: colors.gray100, borderWidth: 1, borderColor: colors.border }}
       >
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={colors.textMuted}
           keyboardType="decimal-pad"
           className="flex-1 py-3 text-base"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         />
       </View>
     </View>

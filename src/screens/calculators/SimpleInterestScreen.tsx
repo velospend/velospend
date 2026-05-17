@@ -12,9 +12,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 
 export default function SimpleInterestScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
 
   const [principal, setPrincipal] = useState("");
   const [rate, setRate] = useState("");
@@ -118,14 +120,14 @@ export default function SimpleInterestScreen() {
             value={principal}
             onChangeText={setPrincipal}
             placeholder="e.g. 10000"
-            color={color}
+            colors={COLORS}
           />
           <CalcInput
             label="Rate of Interest (% per year)"
             value={rate}
             onChangeText={setRate}
             placeholder="e.g. 8"
-            color={color}
+            colors={COLORS}
           />
 
           {/* Time with unit toggle */}
@@ -209,35 +211,35 @@ function CalcInput({
   value,
   onChangeText,
   placeholder,
-  color,
+  colors,
 }: {
   label: string;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
-  color: string;
+  colors: any;
 }) {
   return (
     <View className="mb-3">
-      <Text className="text-sm font-semibold mb-2" style={{ color: COLORS.textSecondary }}>
+      <Text className="text-sm font-semibold mb-2" style={{ color: colors.textSecondary }}>
         {label}
       </Text>
       <View
         className="flex-row items-center rounded-xl px-3"
         style={{
-          backgroundColor: COLORS.gray100,
+          backgroundColor: colors.gray100,
           borderWidth: 1,
-          borderColor: COLORS.border,
+          borderColor: colors.border,
         }}
       >
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={colors.textMuted}
           keyboardType="decimal-pad"
           className="flex-1 py-3 text-base"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         />
       </View>
     </View>

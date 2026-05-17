@@ -11,6 +11,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, INVESTMENT_TYPES } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getInvestmentsByUser, deleteInvestment } from "../../database/queries/investments";
 import { useUserStore } from "../../store/useUserStore";
 import { Investment, MoreStackParamList } from "../../types";
@@ -19,6 +20,7 @@ type InvestmentsNavProp = StackNavigationProp<MoreStackParamList, "InvestmentsSc
 
 export default function InvestmentsScreen() {
   const navigation = useNavigation<InvestmentsNavProp>();
+  const { colors: COLORS } = useThemeStore();
   const { user } = useUserStore();
   const [sections, setSections] = useState<{ title: string; data: Investment[] }[]>([]);
   const [totalInvested, setTotalInvested] = useState(0);

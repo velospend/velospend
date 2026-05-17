@@ -14,6 +14,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import {
   getInvestmentById,
   getInvestmentTransactions,
@@ -31,6 +32,7 @@ type DetailRouteProp = RouteProp<MoreStackParamList, "InvestmentDetailScreen">;
 
 export default function InvestmentDetailScreen() {
   const navigation = useNavigation<DetailNavProp>();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute<DetailRouteProp>();
   const { investmentId } = route.params;
   const { user } = useUserStore();

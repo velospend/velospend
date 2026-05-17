@@ -15,6 +15,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, CATEGORY_ICONS, CATEGORY_COLORS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { createCategory, updateCategory } from "../../database/queries/categories";
 import { useUserStore } from "../../store/useUserStore";
 import { CategoryType } from "../../types";
@@ -28,6 +29,7 @@ const CATEGORY_TYPES: { label: string; value: CategoryType; color: string }[] = 
 
 export default function AddCategoryScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute();
   const { user } = useUserStore();
 
@@ -156,7 +158,7 @@ export default function AddCategoryScreen() {
         </View>
 
         {/* Name */}
-        <SectionCard title="Category Name">
+        <SectionCard title="Category Name" colors={COLORS}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -183,7 +185,7 @@ export default function AddCategoryScreen() {
 
         {/* Type — only for new categories */}
         {!isEditing && (
-          <SectionCard title="Type">
+          <SectionCard title="Type" colors={COLORS}>
             <View className="flex-row gap-2">
               {CATEGORY_TYPES.map((t) => {
                 const isSelected = selectedType === t.value;
@@ -212,7 +214,7 @@ export default function AddCategoryScreen() {
         )}
 
         {/* Icon Picker */}
-        <SectionCard title="Icon">
+        <SectionCard title="Icon" colors={COLORS}>
           <TouchableOpacity
             onPress={() => setShowIconPicker(true)}
             className="flex-row items-center rounded-xl px-3 py-3"
@@ -247,7 +249,7 @@ export default function AddCategoryScreen() {
         </SectionCard>
 
         {/* Color Picker */}
-        <SectionCard title="Color">
+        <SectionCard title="Color" colors={COLORS}>
           <View className="flex-row flex-wrap gap-3">
             {CATEGORY_COLORS.map((color) => {
               const isSelected = selectedColor === color;
@@ -413,18 +415,20 @@ export default function AddCategoryScreen() {
 function SectionCard({
   title,
   children,
+  colors,
 }: {
   title: string;
   children: React.ReactNode;
+  colors: any;
 }) {
   return (
     <View
       className="rounded-2xl p-4 mb-4"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <Text
         className="text-sm font-bold mb-3"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         {title}
       </Text>

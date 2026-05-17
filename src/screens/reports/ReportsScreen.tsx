@@ -13,6 +13,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, { Rect, Text as SvgText, G, Circle, Path } from "react-native-svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import {
   getReportSummary,
   getMonthlySummary,
@@ -36,6 +37,7 @@ const PERIODS = [
 
 export default function ReportsScreen() {
   const { user } = useUserStore();
+  const { colors: COLORS } = useThemeStore();
 
   const [period, setPeriod] = useState("this_month");
   const [customStart, setCustomStart] = useState(new Date());
@@ -185,24 +187,28 @@ export default function ReportsScreen() {
             amount={summary.totalIncome}
             color={COLORS.income}
             icon="arrow-down-circle"
+            colors={COLORS}
           />
           <SummaryCard
             label="Expense"
             amount={summary.totalExpense}
             color={COLORS.expense}
             icon="arrow-up-circle"
+            colors={COLORS}
           />
           <SummaryCard
             label="Investment"
             amount={summary.totalInvestment}
             color={COLORS.investment}
             icon="trending-up"
+            colors={COLORS}
           />
           <SummaryCard
             label="Savings"
             amount={summary.savings}
             color={summary.savings >= 0 ? COLORS.income : COLORS.expense}
             icon="piggy-bank"
+            colors={COLORS}
           />
         </View>
 
@@ -340,10 +346,10 @@ export default function ReportsScreen() {
               </Text>
             </View>
           ) : categoryChartType === "donut" ? (
-            <DonutChart categories={activeCategories} />
-          ) : (
-            <HorizontalBarChart categories={activeCategories} />
-          )}
+  <DonutChart categories={activeCategories} colors={COLORS} />
+) : (
+  <HorizontalBarChart categories={activeCategories} colors={COLORS} />
+)}
         </View>
 
         {/* Top Spending Categories */}
@@ -521,17 +527,19 @@ function SummaryCard({
   amount,
   color,
   icon,
+  colors,
 }: {
   label: string;
   amount: number;
   color: string;
   icon: string;
+  colors: any;
 }) {
   return (
     <View
       className="rounded-2xl p-3 mb-4"
       style={{
-        backgroundColor: COLORS.surface,
+        backgroundColor: colors.surface,
         width: (SCREEN_WIDTH - 48) / 2,
         ...SHADOWS.sm,
       }}
@@ -543,19 +551,19 @@ function SummaryCard({
         >
           <MaterialCommunityIcons name={icon as any} size={16} color={color} />
         </View>
-        <Text className="text-xs font-semibold" style={{ color: COLORS.textSecondary }}>
+        <Text className="text-xs font-semibold" style={{ color: colors.textSecondary }}>
           {label}
         </Text>
       </View>
       <Text
         className="text-base font-bold"
-        style={{ color: COLORS.textPrimary }}
+        style={{ color: colors.textPrimary }}
         numberOfLines={1}
       >
         ₹{Math.abs(amount).toLocaleString("en-IN")}
       </Text>
       {label === "Savings" && amount < 0 && (
-        <Text className="text-xs mt-0.5" style={{ color: COLORS.expense }}>
+        <Text className="text-xs mt-0.5" style={{ color: colors.expense }}>
           Over budget
         </Text>
       )}
@@ -565,7 +573,13 @@ function SummaryCard({
 
 // ─── Donut Chart ──────────────────────────────────────────────────────────────
 
-function DonutChart({ categories }: { categories: CategorySummary[] }) {
+function DonutChart({
+  categories,
+  colors,
+}: {
+  categories: CategorySummary[];
+  colors: any;
+}) {
   const total = categories.reduce((sum, c) => sum + c.total, 0);
   const top5 = categories.slice(0, 5);
   const size = 160;
@@ -608,12 +622,12 @@ function DonutChart({ categories }: { categories: CategorySummary[] }) {
             <Path key={i} d={seg.d} fill={seg.categoryColor} />
           ))}
           {/* Center */}
-          <Circle cx={cx} cy={cy} r={innerRadius - 2} fill={COLORS.surface} />
+          <Circle cx={cx} cy={cy} r={innerRadius - 2} fill={colors.surface} />
           <SvgText
             x={cx}
             y={cy - 6}
             fontSize="10"
-            fill={COLORS.textMuted}
+            fill={colors.textMuted}
             textAnchor="middle"
           >
             Total
@@ -623,7 +637,7 @@ function DonutChart({ categories }: { categories: CategorySummary[] }) {
             y={cy + 10}
             fontSize="11"
             fontWeight="bold"
-            fill={COLORS.textPrimary}
+            fill={colors.textPrimary}
             textAnchor="middle"
           >
             ₹{(total / 1000).toFixed(0)}k
@@ -638,10 +652,10 @@ function DonutChart({ categories }: { categories: CategorySummary[] }) {
             className="w-3 h-3 rounded-full mr-2"
             style={{ backgroundColor: cat.categoryColor }}
           />
-          <Text className="flex-1 text-sm" style={{ color: COLORS.textPrimary }}>
+          <Text className="flex-1 text-sm" style={{ color: colors.textPrimary }}>
             {cat.categoryName}
           </Text>
-          <Text className="text-sm font-bold" style={{ color: COLORS.textPrimary }}>
+          <Text className="text-sm font-bold" style={{ color: colors.textPrimary }}>
             {cat.percentage.toFixed(1)}%
           </Text>
         </View>
@@ -667,7 +681,13 @@ function polarToCartesian(
 
 // ─── Horizontal Bar Chart ─────────────────────────────────────────────────────
 
-function HorizontalBarChart({ categories }: { categories: CategorySummary[] }) {
+function HorizontalBarChart({
+  categories,
+  colors,
+}: {
+  categories: CategorySummary[];
+  colors: any;
+}) {
   const top5 = categories.slice(0, 5);
 
   return (
@@ -688,18 +708,18 @@ function HorizontalBarChart({ categories }: { categories: CategorySummary[] }) {
               </View>
               <Text
                 className="text-sm font-semibold"
-                style={{ color: COLORS.textPrimary }}
+                style={{ color: colors.textPrimary }}
               >
                 {cat.categoryName}
               </Text>
             </View>
-            <Text className="text-sm font-bold" style={{ color: COLORS.textPrimary }}>
+            <Text className="text-sm font-bold" style={{ color: colors.textPrimary }}>
               ₹{cat.total.toLocaleString("en-IN")}
             </Text>
           </View>
           <View
             className="h-2 rounded-full overflow-hidden"
-            style={{ backgroundColor: COLORS.gray200 }}
+            style={{ backgroundColor: colors.gray200 }}
           >
             <View
               className="h-full rounded-full"
@@ -711,7 +731,7 @@ function HorizontalBarChart({ categories }: { categories: CategorySummary[] }) {
           </View>
           <Text
             className="text-xs mt-0.5 text-right"
-            style={{ color: COLORS.textMuted }}
+            style={{ color: colors.textMuted }}
           >
             {cat.percentage.toFixed(1)}%
           </Text>

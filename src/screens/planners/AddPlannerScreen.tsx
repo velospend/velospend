@@ -14,6 +14,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { createPlanner, updatePlanner, getPlannerById } from "../../database/queries/planners";
 import { useUserStore } from "../../store/useUserStore";
 import { PlannerType } from "../../types";
@@ -25,6 +26,7 @@ const PLANNER_TYPES: { label: string; value: PlannerType; color: string; icon: s
 
 export default function AddPlannerScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute();
   const { user } = useUserStore();
 
@@ -160,7 +162,7 @@ export default function AddPlannerScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Title */}
-        <SectionCard title="Planner Title">
+        <SectionCard title="Planner Title" colors={COLORS}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -186,7 +188,7 @@ export default function AddPlannerScreen() {
         </SectionCard>
 
         {/* Total Planned Amount */}
-        <SectionCard title="Total Planned Amount">
+        <SectionCard title="Total Planned Amount" colors={COLORS}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -214,7 +216,7 @@ export default function AddPlannerScreen() {
         </SectionCard>
 
         {/* Date Range */}
-        <SectionCard title="Date Range">
+        <SectionCard title="Date Range" colors={COLORS}>
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => setShowStartPicker(true)}
@@ -314,15 +316,15 @@ export default function AddPlannerScreen() {
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({ title, children, colors }: { title: string; children: React.ReactNode; colors: any }) {
   return (
     <View
       className="rounded-2xl p-4 mb-4"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <Text
         className="text-sm font-bold mb-3"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         {title}
       </Text>

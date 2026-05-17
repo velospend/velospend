@@ -11,6 +11,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getPlannersByUser, deletePlanner, getUsedAmountForRecord, getPlannerRecords } from "../../database/queries/planners";
 import { useUserStore } from "../../store/useUserStore";
 import { Planner, PlannerStackParamList } from "../../types";
@@ -20,6 +21,7 @@ type PlannersNavProp = StackNavigationProp<PlannerStackParamList, "PlannersScree
 export default function PlannersScreen() {
   const navigation = useNavigation<PlannersNavProp>();
   const { user } = useUserStore();
+  const { colors: COLORS } = useThemeStore();
   const [sections, setSections] = useState<{ title: string; data: Planner[] }[]>([]);
 
   const loadPlanners = useCallback(() => {
@@ -90,7 +92,7 @@ export default function PlannersScreen() {
       </View>
 
       {sections.length === 0 ? (
-        <EmptyPlanners onAdd={() => navigation.navigate("AddPlannerScreen")} />
+        <EmptyPlanners onAdd={() => navigation.navigate("AddPlannerScreen")} colors={COLORS} />
       ) : (
         <SectionList
           sections={sections}
@@ -151,6 +153,7 @@ export default function PlannersScreen() {
                 onPress={() => navigation.navigate("PlannerDetailScreen", { plannerId: item.id })}
                 onEdit={() => navigation.navigate("EditPlannerScreen", { plannerId: item.id })}
                 onDelete={() => handleDelete(item)}
+                colors={COLORS}
               />
             );
           }}
@@ -171,6 +174,7 @@ function PlannerCard({
   onPress,
   onEdit,
   onDelete,
+  colors
 }: {
   planner: Planner;
   totalUsed: number;
@@ -180,20 +184,21 @@ function PlannerCard({
   onPress: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  colors: any;
 }) {
-  const typeColor = planner.type === "expense" ? COLORS.expense : COLORS.income;
+  const typeColor = planner.type === "expense" ? colors.expense : colors.income;
   const progressColor = percent >= 100
-    ? COLORS.error
+    ? colors.error
     : percent >= 80
-    ? COLORS.warning
-    : COLORS.income;
+    ? colors.warning
+    : colors.income;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       className="rounded-2xl p-4 mb-3"
       style={{
-        backgroundColor: COLORS.surface,
+        backgroundColor: colors.surface,
         ...SHADOWS.sm,
         opacity: isExpired ? 0.7 : 1,
       }}
@@ -203,7 +208,7 @@ function PlannerCard({
         <View className="flex-1 mr-3">
           <Text
             className="text-base font-bold"
-            style={{ color: COLORS.textPrimary }}
+            style={{ color: colors.textPrimary }}
             numberOfLines={1}
           >
             {planner.title}
@@ -220,7 +225,7 @@ function PlannerCard({
                 {planner.type}
               </Text>
             </View>
-            <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+            <Text className="text-xs" style={{ color: colors.textMuted }}>
               {new Date(planner.startDate).toLocaleDateString("en-IN", {
                 day: "numeric",
                 month: "short",
@@ -238,31 +243,31 @@ function PlannerCard({
           <TouchableOpacity
             onPress={onEdit}
             className="w-7 h-7 rounded-full items-center justify-center"
-            style={{ backgroundColor: COLORS.primary + "20" }}
+            style={{ backgroundColor: colors.primary + "20" }}
           >
-            <MaterialCommunityIcons name="pencil" size={14} color={COLORS.primary} />
+            <MaterialCommunityIcons name="pencil" size={14} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onDelete}
             className="w-7 h-7 rounded-full items-center justify-center"
-            style={{ backgroundColor: COLORS.error + "20" }}
+            style={{ backgroundColor: colors.error + "20" }}
           >
-            <MaterialCommunityIcons name="trash-can" size={14} color={COLORS.error} />
+            <MaterialCommunityIcons name="trash-can" size={14} color={colors.error} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Amount Row */}
       <View className="flex-row justify-between mb-2">
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           {planner.type === "expense" ? "Spent" : "Earned"}:{" "}
-          <Text className="font-bold" style={{ color: COLORS.textPrimary }}>
+          <Text className="font-bold" style={{ color: colors.textPrimary }}>
             ₹{totalUsed.toLocaleString("en-IN")}
           </Text>
         </Text>
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           Planned:{" "}
-          <Text className="font-bold" style={{ color: COLORS.textPrimary }}>
+          <Text className="font-bold" style={{ color: colors.textPrimary }}>
             ₹{totalPlanned.toLocaleString("en-IN")}
           </Text>
         </Text>
@@ -271,7 +276,7 @@ function PlannerCard({
       {/* Progress Bar */}
       <View
         className="h-2 rounded-full overflow-hidden"
-        style={{ backgroundColor: COLORS.gray200 }}
+        style={{ backgroundColor: colors.gray200 }}
       >
         <View
           className="h-full rounded-full"
@@ -293,30 +298,30 @@ function PlannerCard({
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
-function EmptyPlanners({ onAdd }: { onAdd: () => void }) {
+function EmptyPlanners({ onAdd, colors }: { onAdd: () => void; colors: any }) {
   return (
     <View className="flex-1 items-center justify-center px-8">
       <MaterialCommunityIcons
         name="clipboard-list"
         size={64}
-        color={COLORS.gray300}
+        color={colors.gray300}
       />
       <Text
         className="text-lg font-bold mt-4"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         No Planners Yet
       </Text>
       <Text
         className="text-sm text-center mt-2 mb-6"
-        style={{ color: COLORS.textMuted }}
+        style={{ color: colors.textMuted }}
       >
         Create a budget planner to track your spending and income goals
       </Text>
       <TouchableOpacity
         onPress={onAdd}
         className="px-6 py-3 rounded-2xl"
-        style={{ backgroundColor: COLORS.primary }}
+        style={{ backgroundColor: colors.primary }}
       >
         <Text className="text-white font-bold">Create Planner</Text>
       </TouchableOpacity>

@@ -5,26 +5,28 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createTables, seedGuestUser } from "./src/database/schema";
 import RootNavigator from "./src/navigation";
 import { COLORS } from "./src/constants";
+import { useThemeStore } from "./src/store/useThemeStore";
 
 export default function App() {
+  const { loadTheme, colors: COLORS } = useThemeStore();
   const [dbReady, setDbReady] = useState(false);
 
   useEffect(() => {
-    const initDb = async () => {
+    const init = async () => {
       try {
         createTables();
         seedGuestUser();
-        console.log("✅ Database initialized successfully");
+        await loadTheme();
+        console.log("✅ App initialized successfully");
       } catch (error) {
-        console.error("❌ Database initialization failed:", error);
+        console.error("❌ Initialization failed:", error);
       } finally {
         setDbReady(true);
       }
     };
-    initDb();
+    init();
   }, []);
 
-  // don't render anything until database is ready
   if (!dbReady) {
     return (
       <View

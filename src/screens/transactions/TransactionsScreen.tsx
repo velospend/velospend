@@ -13,6 +13,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getFilteredTransactions } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
@@ -37,6 +38,7 @@ interface GroupedTransactions {
 export default function TransactionsScreen() {
   const navigation = useNavigation<TransactionsNavProp>();
   const { user, accounts } = useUserStore();
+  const { colors: COLORS } = useThemeStore();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -178,17 +180,17 @@ export default function TransactionsScreen() {
           <SummaryChip
             label="Income"
             amount={summary.income}
-            color={COLORS.income}
+            colors={COLORS}
           />
           <SummaryChip
             label="Expense"
             amount={summary.expense}
-            color={COLORS.expense}
+            colors={COLORS}
           />
           <SummaryChip
             label="Invest"
             amount={summary.investment}
-            color={COLORS.investment}
+            colors={COLORS}
           />
         </View>
 
@@ -248,7 +250,7 @@ export default function TransactionsScreen() {
 
       {/* Grouped Transaction List */}
       {grouped.length === 0 ? (
-        <EmptyTransactions />
+        <EmptyTransactions colors={COLORS} />
       ) : (
         <FlatList
           data={grouped}
@@ -295,6 +297,7 @@ export default function TransactionsScreen() {
                           transactionId: txn.id,
                         })
                       }
+                      colors={COLORS}
                     />
                   );
                 })}
@@ -306,6 +309,7 @@ export default function TransactionsScreen() {
 
       {/* Filter Modal */}
       <FilterModal
+        colors={COLORS}
         visible={showFilterModal}
         accounts={accounts}
         categories={categories}
@@ -336,7 +340,7 @@ export default function TransactionsScreen() {
 
 // ─── Summary Chip ─────────────────────────────────────────────────────────────
 
-function SummaryChip({ label, amount, color }: { label: string; amount: number; color: string }) {
+function SummaryChip({ label, amount, colors }: { label: string; amount: number; colors: any }) {
   return (
     <View
       className="rounded-xl px-3 py-2"
@@ -361,17 +365,19 @@ function TransactionRow({
   category,
   isLast,
   onPress,
+  colors
 }: {
   transaction: Transaction;
   category: any;
   isLast: boolean;
   onPress: () => void;
+  colors: any;
 }) {
   const typeColors: Record<string, string> = {
-    income: COLORS.income,
-    expense: COLORS.expense,
-    investment: COLORS.investment,
-    self_transfer: COLORS.transfer,
+    income: colors.income,
+    expense: colors.expense,
+    investment: colors.investment,
+    self_transfer: colors.transfer,
   };
 
   const typeIcons: Record<string, string> = {
@@ -381,7 +387,7 @@ function TransactionRow({
     self_transfer: "swap-horizontal",
   };
 
-  const color = category?.color || typeColors[transaction.type] || COLORS.primary;
+  const color = category?.color || typeColors[transaction.type] || colors.primary;
   const icon = category?.icon || typeIcons[transaction.type] || "circle";
   const isIncome = transaction.type === "income";
 
@@ -391,7 +397,7 @@ function TransactionRow({
       className="flex-row items-center px-4 py-3"
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: COLORS.border,
+        borderBottomColor: colors.border,
       }}
     >
       <View
@@ -403,12 +409,12 @@ function TransactionRow({
       <View className="flex-1">
         <Text
           className="text-sm font-semibold"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
           numberOfLines={1}
         >
           {transaction.note || category?.name || transaction.type}
         </Text>
-        <Text className="text-xs mt-0.5" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
           {new Date(transaction.dateTime).toLocaleTimeString("en-IN", {
             hour: "2-digit",
             minute: "2-digit",
@@ -418,7 +424,7 @@ function TransactionRow({
       </View>
       <Text
         className="text-sm font-bold"
-        style={{ color: isIncome ? COLORS.income : COLORS.expense }}
+        style={{ color: isIncome ? colors.income : colors.expense }}
       >
         {isIncome ? "+" : "-"}₹{transaction.amount.toLocaleString("en-IN")}
       </Text>
@@ -446,6 +452,7 @@ function FilterModal({
   onEndDateChange,
   onClear,
   onClose,
+  colors
 }: any) {
   return (
     <Modal
@@ -460,20 +467,20 @@ function FilterModal({
       >
         <View
           className="rounded-t-3xl"
-          style={{ backgroundColor: COLORS.surface, maxHeight: "80%" }}
+          style={{ backgroundColor: colors.surface, maxHeight: "80%" }}
         >
           {/* Handle */}
           <View className="items-center pt-3 pb-1">
-            <View className="w-10 h-1 rounded-full" style={{ backgroundColor: COLORS.gray300 }} />
+            <View className="w-10 h-1 rounded-full" style={{ backgroundColor: colors.gray300 }} />
           </View>
 
           {/* Header */}
           <View className="flex-row items-center justify-between px-5 py-3">
-            <Text className="text-lg font-bold" style={{ color: COLORS.textPrimary }}>
+            <Text className="text-lg font-bold" style={{ color: colors.textPrimary }}>
               Filters
             </Text>
             <TouchableOpacity onPress={onClose}>
-              <MaterialCommunityIcons name="close" size={24} color={COLORS.gray400} />
+              <MaterialCommunityIcons name="close" size={24} color={colors.gray400} />
             </TouchableOpacity>
           </View>
 
@@ -482,7 +489,7 @@ function FilterModal({
             showsVerticalScrollIndicator={false}
           >
             {/* Account Filter */}
-            <Text className="text-sm font-bold mb-2" style={{ color: COLORS.textSecondary }}>
+            <Text className="text-sm font-bold mb-2" style={{ color: colors.textSecondary }}>
               Account
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
@@ -491,6 +498,7 @@ function FilterModal({
                   label="All"
                   isSelected={!selectedAccountId}
                   onPress={() => onSelectAccount("")}
+                  colors={COLORS}
                 />
                 {accounts.map((acc: any) => (
                   <FilterChip
@@ -498,13 +506,14 @@ function FilterModal({
                     label={acc.name}
                     isSelected={selectedAccountId === acc.id}
                     onPress={() => onSelectAccount(acc.id)}
+                    colors={COLORS}
                   />
                 ))}
               </View>
             </ScrollView>
 
             {/* Category Filter */}
-            <Text className="text-sm font-bold mb-2" style={{ color: COLORS.textSecondary }}>
+            <Text className="text-sm font-bold mb-2" style={{ color: colors.textSecondary }}>
               Category
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
@@ -513,6 +522,7 @@ function FilterModal({
                   label="All"
                   isSelected={!selectedCategoryId}
                   onPress={() => onSelectCategory("")}
+                  colors={COLORS}
                 />
                 {categories.map((cat: any) => (
                   <FilterChip
@@ -520,13 +530,14 @@ function FilterModal({
                     label={cat.name}
                     isSelected={selectedCategoryId === cat.id}
                     onPress={() => onSelectCategory(cat.id)}
+                    colors={COLORS}
                   />
                 ))}
               </View>
             </ScrollView>
 
             {/* Date Range */}
-            <Text className="text-sm font-bold mb-2" style={{ color: COLORS.textSecondary }}>
+            <Text className="text-sm font-bold mb-2" style={{ color: colors.textSecondary }}>
               Date Range
             </Text>
             <View className="flex-row gap-3 mb-4">
@@ -534,13 +545,13 @@ function FilterModal({
                 onPress={onStartDatePress}
                 className="flex-1 flex-row items-center rounded-xl px-3 py-3"
                 style={{
-                  backgroundColor: COLORS.gray100,
+                  backgroundColor: colors.gray100,
                   borderWidth: 1,
-                  borderColor: startDate ? COLORS.primary : COLORS.border,
+                  borderColor: startDate ? colors.primary : colors.border,
                 }}
               >
-                <MaterialCommunityIcons name="calendar-start" size={18} color={COLORS.gray400} />
-                <Text className="text-sm ml-2" style={{ color: startDate ? COLORS.textPrimary : COLORS.textMuted }}>
+                <MaterialCommunityIcons name="calendar-start" size={18} color={colors.gray400} />
+                <Text className="text-sm ml-2" style={{ color: startDate ? colors.textPrimary : colors.textMuted }}>
                   {startDate
                     ? startDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })
                     : "From"}
@@ -551,13 +562,13 @@ function FilterModal({
                 onPress={onEndDatePress}
                 className="flex-1 flex-row items-center rounded-xl px-3 py-3"
                 style={{
-                  backgroundColor: COLORS.gray100,
+                  backgroundColor: colors.gray100,
                   borderWidth: 1,
-                  borderColor: endDate ? COLORS.primary : COLORS.border,
+                  borderColor: endDate ? colors.primary : colors.border,
                 }}
               >
-                <MaterialCommunityIcons name="calendar-end" size={18} color={COLORS.gray400} />
-                <Text className="text-sm ml-2" style={{ color: endDate ? COLORS.textPrimary : COLORS.textMuted }}>
+                <MaterialCommunityIcons name="calendar-end" size={18} color={colors.gray400} />
+                <Text className="text-sm ml-2" style={{ color: endDate ? colors.textPrimary : colors.textMuted }}>
                   {endDate
                     ? endDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })
                     : "To"}
@@ -587,9 +598,9 @@ function FilterModal({
             <TouchableOpacity
               onPress={() => { onClear(); onClose(); }}
               className="rounded-2xl py-4 items-center mt-2"
-              style={{ backgroundColor: COLORS.gray100, borderWidth: 1, borderColor: COLORS.border }}
+              style={{ backgroundColor: colors.gray100, borderWidth: 1, borderColor: colors.border }}
             >
-              <Text className="text-sm font-bold" style={{ color: COLORS.textSecondary }}>
+              <Text className="text-sm font-bold" style={{ color: colors.textSecondary }}>
                 Clear All Filters
               </Text>
             </TouchableOpacity>
@@ -602,20 +613,20 @@ function FilterModal({
 
 // ─── Filter Chip ──────────────────────────────────────────────────────────────
 
-function FilterChip({ label, isSelected, onPress }: { label: string; isSelected: boolean; onPress: () => void }) {
+function FilterChip({ label, isSelected, onPress, colors }: { label: string; isSelected: boolean; onPress: () => void; colors: any }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       className="px-4 py-2 rounded-full"
       style={{
-        backgroundColor: isSelected ? COLORS.primary : COLORS.gray100,
+        backgroundColor: isSelected ? colors.primary : colors.gray100,
         borderWidth: 1,
-        borderColor: isSelected ? COLORS.primary : COLORS.border,
+        borderColor: isSelected ? colors.primary : colors.border,
       }}
     >
       <Text
         className="text-xs font-semibold"
-        style={{ color: isSelected ? "white" : COLORS.textSecondary }}
+        style={{color: isSelected ? "white" : colors.textSecondary}}
       >
         {label}
       </Text>
@@ -625,14 +636,14 @@ function FilterChip({ label, isSelected, onPress }: { label: string; isSelected:
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
-function EmptyTransactions() {
+function EmptyTransactions({ colors }: { colors: any }) {
   return (
     <View className="flex-1 items-center justify-center py-20">
-      <MaterialCommunityIcons name="receipt" size={56} color={COLORS.gray300} />
-      <Text className="text-base font-semibold mt-4" style={{ color: COLORS.textSecondary }}>
+      <MaterialCommunityIcons name="receipt" size={56} color={colors.gray300} />
+      <Text className="text-base font-semibold mt-4" style={{ color: colors.textSecondary }}>
         No transactions found
       </Text>
-      <Text className="text-sm text-center mt-1" style={{ color: COLORS.textMuted }}>
+      <Text className="text-sm text-center mt-1" style={{ color: colors.textMuted }}>
         Try adjusting your filters or add a new transaction
       </Text>
     </View>

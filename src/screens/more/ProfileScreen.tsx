@@ -13,12 +13,14 @@ import {
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { updateUser } from "../../database/queries/users";
 import { useUserStore } from "../../store/useUserStore";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
   const { user, loadUser } = useUserStore();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -170,6 +172,7 @@ export default function ProfileScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g. Your Name"
+                colors={COLORS}
               />
               <ProfileInput
                 label="Email Address"
@@ -178,6 +181,7 @@ export default function ProfileScreen() {
                 onChangeText={setEmail}
                 placeholder="e.g. your@email.com"
                 keyboardType="email-address"
+                colors={COLORS}
               />
 <View className="mb-3">
   <Text
@@ -237,12 +241,14 @@ export default function ProfileScreen() {
                 value={city}
                 onChangeText={setCity}
                 placeholder="e.g. Gurugram"
+                colors={COLORS}
               />
               <ProfileInput
                 label="Country"
                 icon="earth"
                 value={country}
                 onChangeText={setCountry}
+                colors={COLORS}
                 placeholder="e.g. India"
                 isLast
               />
@@ -291,11 +297,13 @@ export default function ProfileScreen() {
                 icon="account"
                 label="Full Name"
                 value={user?.name || "Not set"}
+                colors={COLORS}
               />
               <ProfileRow
                 icon="email"
                 label="Email Address"
                 value={user?.email || "Not set"}
+                colors={COLORS}
               />
               <ProfileRow
   icon="calendar"
@@ -309,17 +317,20 @@ export default function ProfileScreen() {
         })
       : "Not set"
   }
+  colors={COLORS}
 />
               <ProfileRow
                 icon="city"
                 label="City"
                 value={user?.city || "Not set"}
+                colors={COLORS}
               />
               <ProfileRow
                 icon="earth"
                 label="Country"
                 value={user?.country || "Not set"}
                 isLast
+                colors={COLORS}
               />
             </View>
 
@@ -332,12 +343,14 @@ export default function ProfileScreen() {
                 icon="information"
                 label="App Version"
                 value="VeloSpend v1.0.0"
+                colors={COLORS}
               />
               <ProfileRow
                 icon="database"
                 label="Storage"
                 value="Local (on device)"
                 isLast
+                colors={COLORS}
               />
             </View>
 
@@ -369,37 +382,39 @@ function ProfileRow({
   label,
   value,
   isLast,
+  colors
 }: {
   icon: string;
   label: string;
   value: string;
   isLast?: boolean;
+  colors: any;
 }) {
   return (
     <View
       className="flex-row items-center px-4 py-3"
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: COLORS.border,
+        borderBottomColor: colors.border,
       }}
     >
       <View
         className="w-8 h-8 rounded-full items-center justify-center mr-3"
-        style={{ backgroundColor: COLORS.primary + "20" }}
+        style={{ backgroundColor: colors.primary + "20" }}
       >
         <MaterialCommunityIcons
           name={icon as any}
           size={16}
-          color={COLORS.primary}
+          color={colors.primary}
         />
       </View>
       <View className="flex-1">
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           {label}
         </Text>
         <Text
           className="text-sm font-semibold mt-0.5"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         >
           {value}
         </Text>
@@ -418,6 +433,7 @@ function ProfileInput({
   placeholder,
   keyboardType = "default",
   isLast,
+  colors
 }: {
   label: string;
   icon: string;
@@ -426,37 +442,38 @@ function ProfileInput({
   placeholder: string;
   keyboardType?: "default" | "email-address";
   isLast?: boolean;
+  colors: any;
 }) {
   return (
     <View className={isLast ? "" : "mb-3"}>
       <Text
         className="text-xs font-semibold mb-1 ml-1"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         {label}
       </Text>
       <View
         className="flex-row items-center rounded-xl px-3"
         style={{
-          backgroundColor: COLORS.gray100,
+          backgroundColor: colors.gray100,
           borderWidth: 1,
-          borderColor: COLORS.border,
+          borderColor: colors.border,
         }}
       >
         <MaterialCommunityIcons
           name={icon as any}
           size={18}
-          color={COLORS.gray400}
+          color={colors.gray400}
         />
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={colors.textMuted}
           keyboardType={keyboardType}
           autoCapitalize={keyboardType === "email-address" ? "none" : "words"}
           className="flex-1 py-3 px-2 text-sm"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         />
       </View>
     </View>

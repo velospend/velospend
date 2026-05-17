@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getTransactionById, updateTransaction, getPreviousNotes, createTransaction } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
@@ -41,6 +42,7 @@ const TRANSACTION_TYPES: {
 export default function AddTransactionScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const { colors: COLORS } = useThemeStore();
   const transactionId = (route.params as any)?.transactionId;
   const isEditing = !!transactionId;
   const { user, loadAccounts } = useUserStore();
@@ -342,7 +344,7 @@ useEffect(() => {
         keyboardShouldPersistTaps="handled"
       >
         {/* Date & Time */}
-        <SectionCard title="Date & Time">
+        <SectionCard title="Date & Time" colors={COLORS}>
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
@@ -431,7 +433,7 @@ useEffect(() => {
         </SectionCard>
 
         {/* Amount */}
-        <SectionCard title="Amount">
+        <SectionCard title="Amount" colors={COLORS}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -459,7 +461,7 @@ useEffect(() => {
         </SectionCard>
 
         {/* From Account */}
-        <SectionCard title={type === "self_transfer" ? "From Account" : "Account"}>
+        <SectionCard title={type === "self_transfer" ? "From Account" : "Account"} colors={COLORS}>
           <TouchableOpacity
             onPress={() => setShowAccountModal(true)}
             className="flex-row items-center rounded-xl px-3 py-3"
@@ -492,7 +494,7 @@ useEffect(() => {
 
         {/* To Account — only for self transfer */}
         {type === "self_transfer" && (
-          <SectionCard title="To Account">
+          <SectionCard title="To Account" colors={COLORS}>
             <TouchableOpacity
               onPress={() => setShowToAccountModal(true)}
               className="flex-row items-center rounded-xl px-3 py-3"
@@ -530,7 +532,7 @@ useEffect(() => {
 
         {/* Category — hidden for self transfer */}
         {type !== "self_transfer" && (
-          <SectionCard title="Category">
+          <SectionCard title="Category" colors={COLORS}>
             <TouchableOpacity
               onPress={() => setShowCategoryModal(true)}
               className="flex-row items-center rounded-xl px-3 py-3"
@@ -579,7 +581,7 @@ useEffect(() => {
 
         {/* Planner — only for expense and income */}
         {(type === "expense" || type === "income") && (
-          <SectionCard title="Link to Planner (Optional)">
+          <SectionCard title="Link to Planner (Optional)" colors={COLORS}>
             <TouchableOpacity
               onPress={() => setShowPlannerModal(true)}
               className="flex-row items-center rounded-xl px-3 py-3"
@@ -627,7 +629,7 @@ useEffect(() => {
         )}
 
         {/* Note */}
-        <SectionCard title="Note (Optional)">
+        <SectionCard title="Note (Optional)" colors={COLORS}>
           <NoteInput
             value={note}
             onChangeText={setNote}
@@ -636,7 +638,7 @@ useEffect(() => {
         </SectionCard>
 
         {/* Description */}
-        <SectionCard title="Description (Optional)">
+        <SectionCard title="Description (Optional)" colors={COLORS}>
           <View
             className="rounded-xl px-3"
             style={{
@@ -723,18 +725,20 @@ useEffect(() => {
 function SectionCard({
   title,
   children,
+  colors
 }: {
   title: string;
   children: React.ReactNode;
+  colors: any;
 }) {
   return (
     <View
       className="rounded-2xl p-4 mb-4"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <Text
         className="text-sm font-bold mb-3"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         {title}
       </Text>

@@ -42,6 +42,8 @@ import {
   PlannerStackParamList,
   MoreStackParamList,
 } from "../types";
+import CurrencyScreen from "../screens/more/CurrencyScreen";
+import { useThemeStore } from "../store/useThemeStore";
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -72,6 +74,8 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="AddInvestmentScreen" component={AddInvestmentScreen} />
       <HomeStack.Screen name="EditInvestmentScreen" component={AddInvestmentScreen} />
       <HomeStack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <HomeStack.Screen name="SettingsScreen" component={SettingsScreen} />
+      <HomeStack.Screen name="CurrencyScreen" component={CurrencyScreen} />
       <HomeStack.Screen name="MoreScreen" component={MoreScreen} />
     </HomeStack.Navigator>
   );
@@ -134,6 +138,7 @@ function ReportsStackNavigator() {
 // ─── Bottom Tab Navigator ─────────────────────────────────────────────────────
 
 function MainApp() {
+  const { colors: COLORS } = useThemeStore();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

@@ -11,6 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCallback } from "react";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { useUserStore } from "../../store/useUserStore";
 import { deleteAccount } from "../../database/queries/accounts";
 import { Account, HomeStackParamList } from "../../types";
@@ -20,6 +21,7 @@ type AccountsNavProp = StackNavigationProp<HomeStackParamList, "AccountsScreen">
 export default function AccountsScreen() {
   const navigation = useNavigation<AccountsNavProp>();
   const { accounts, loadAccounts } = useUserStore();
+  const { colors: COLORS } = useThemeStore();
 
   // reload accounts every time screen comes into focus
   useFocusEffect(
@@ -106,12 +108,13 @@ export default function AccountsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<EmptyAccounts />}
+        ListEmptyComponent={<EmptyAccounts colors={COLORS} />}
         renderItem={({ item }) => (
           <AccountListItem
             account={item}
             onEdit={() => navigation.navigate("EditAccountScreen", { accountId: item.id })}
             onDelete={() => handleDelete(item)}
+            colors={COLORS}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
@@ -126,9 +129,10 @@ interface AccountListItemProps {
   account: Account;
   onEdit: () => void;
   onDelete: () => void;
+  colors: any;
 }
 
-function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
+function AccountListItem({ account, onEdit, onDelete, colors }: AccountListItemProps) {
   const accountColors: Record<string, string> = {
     cash: "#2ECC71",
     wallet: "#F39C12",
@@ -149,7 +153,7 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
     other: "dots-horizontal",
   };
 
-  const color = accountColors[account.type] || COLORS.primary;
+  const color = accountColors[account.type] || colors.primary;
   const icon = accountIcons[account.type] || "bank";
 
   const change = account.currentBalance - account.totalAmount;
@@ -158,7 +162,7 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
   return (
     <View
       className="rounded-2xl p-4"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <View className="flex-row items-center justify-between">
         {/* Left — icon + info */}
@@ -176,13 +180,13 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
           <View className="flex-1">
             <Text
               className="text-base font-bold"
-              style={{ color: COLORS.textPrimary }}
+              style={{ color: colors.textPrimary }}
             >
               {account.name}
             </Text>
             <Text
               className="text-xs mt-0.5 capitalize"
-              style={{ color: COLORS.textMuted }}
+              style={{ color: colors.textMuted }}
             >
               {account.type.replace("_", " ")} · {account.currency}
             </Text>
@@ -192,11 +196,11 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
                 <MaterialCommunityIcons
                   name={isPositive ? "trending-up" : "trending-down"}
                   size={12}
-                  color={isPositive ? COLORS.income : COLORS.expense}
+                  color={isPositive ? colors.income : colors.expense}
                 />
                 <Text
                   className="text-xs ml-0.5 font-semibold"
-                  style={{ color: isPositive ? COLORS.income : COLORS.expense }}
+                  style={{ color: isPositive ? colors.income : colors.expense }}
                 >
                   {isPositive ? "+" : ""}₹{change.toLocaleString("en-IN")} since opening
                 </Text>
@@ -209,13 +213,13 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
         <View className="items-end">
           <Text
             className="text-base font-bold"
-            style={{ color: COLORS.textPrimary }}
+            style={{ color: colors.textPrimary }}
           >
             ₹{account.currentBalance.toLocaleString("en-IN")}
           </Text>
           <Text
             className="text-xs mt-0.5"
-            style={{ color: COLORS.textMuted }}
+            style={{ color: colors.textMuted }}
           >
             Opening: ₹{account.totalAmount.toLocaleString("en-IN")}
           </Text>
@@ -223,23 +227,23 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
             <TouchableOpacity
               onPress={onEdit}
               className="w-7 h-7 rounded-full items-center justify-center"
-              style={{ backgroundColor: COLORS.primary + "20" }}
+              style={{ backgroundColor: colors.primary + "20" }}
             >
               <MaterialCommunityIcons
                 name="pencil"
                 size={14}
-                color={COLORS.primary}
+                color={colors.primary}
               />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onDelete}
               className="w-7 h-7 rounded-full items-center justify-center"
-              style={{ backgroundColor: COLORS.error + "20" }}
+              style={{ backgroundColor: colors.error + "20" }}
             >
               <MaterialCommunityIcons
                 name="trash-can"
                 size={14}
-                color={COLORS.error}
+                color={colors.error}
               />
             </TouchableOpacity>
           </View>
@@ -251,23 +255,23 @@ function AccountListItem({ account, onEdit, onDelete }: AccountListItemProps) {
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
-function EmptyAccounts() {
+function EmptyAccounts({ colors }: { colors: any }) {
   return (
     <View className="items-center py-16">
       <MaterialCommunityIcons
         name="bank-off"
         size={56}
-        color={COLORS.gray300}
+        color={colors.gray300}
       />
       <Text
         className="text-base font-semibold mt-4"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         No accounts yet
       </Text>
       <Text
         className="text-sm text-center mt-1"
-        style={{ color: COLORS.textMuted }}
+        style={{ color: colors.textMuted }}
       >
         Tap the + button to add your first account
       </Text>

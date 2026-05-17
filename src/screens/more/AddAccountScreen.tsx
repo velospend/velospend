@@ -13,6 +13,7 @@ import {
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, ACCOUNT_TYPES, CURRENCIES } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { createAccount, updateAccount } from "../../database/queries/accounts";
 import { useUserStore } from "../../store/useUserStore";
 import { HomeStackParamList } from "../../types";
@@ -22,6 +23,7 @@ type RouteType = RouteProp<HomeStackParamList, "EditAccountScreen">;
 
 export default function AddAccountScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute<RouteType>();
   const { user, loadAccounts } = useUserStore();
 
@@ -132,7 +134,7 @@ export default function AddAccountScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Account Name */}
-        <SectionCard title="Account Name">
+        <SectionCard title="Account Name" colors={COLORS}>
           <View
             className="flex-row items-center rounded-xl px-3"
             style={{
@@ -158,7 +160,7 @@ export default function AddAccountScreen() {
         </SectionCard>
 
         {/* Account Type */}
-        <SectionCard title="Account Type">
+        <SectionCard title="Account Type" colors={COLORS}>
           <View className="flex-row flex-wrap gap-2">
             {ACCOUNT_TYPES.map((type) => {
               const isSelected = selectedType === type.value;
@@ -195,7 +197,7 @@ export default function AddAccountScreen() {
         </SectionCard>
 
         {/* Balance */}
-<SectionCard title={isEditing ? "Current Balance" : "Opening Balance"}>
+<SectionCard title={isEditing ? "Current Balance" : "Opening Balance"} colors={COLORS}>
   <View
     className="flex-row items-center rounded-xl px-3"
     style={{
@@ -239,7 +241,7 @@ export default function AddAccountScreen() {
 </SectionCard>
 
         {/* Currency */}
-        <SectionCard title="Currency">
+        <SectionCard title="Currency" colors={COLORS}>
           <View className="flex-row flex-wrap gap-2">
             {CURRENCIES.map((currency) => {
               const isSelected = selectedCurrency === currency.value;
@@ -294,18 +296,20 @@ export default function AddAccountScreen() {
 function SectionCard({
   title,
   children,
+  colors
 }: {
   title: string;
   children: React.ReactNode;
+  colors: any;
 }) {
   return (
     <View
       className="rounded-2xl p-4 mb-4"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <Text
         className="text-sm font-bold mb-3"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         {title}
       </Text>

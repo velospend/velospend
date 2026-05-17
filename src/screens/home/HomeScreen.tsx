@@ -12,6 +12,7 @@ import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, SPACING, RADIUS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { useUserStore } from "../../store/useUserStore";
 import { useTransactionStore } from "../../store/useTransactionStore";
 import { Account, Transaction } from "../../types";
@@ -20,6 +21,8 @@ import { HomeStackParamList } from "../../types";
 type HomeNavProp = StackNavigationProp<HomeStackParamList, "HomeScreen">;
 
 export default function HomeScreen() {
+  const { colors: COLORS } = useThemeStore();
+  
   const navigation = useNavigation<HomeNavProp>();
   const { user, accounts, loadUser, loadAccounts } = useUserStore();
   const { recentTransactions, loadRecentTransactions } = useTransactionStore();
@@ -119,7 +122,7 @@ useFocusEffect(
                   </TouchableOpacity>
                 );
               }
-              return <AccountCard account={item} />;
+              return <AccountCard account={item} colors={COLORS} />;
             }}
           />
         </View>
@@ -146,10 +149,10 @@ useFocusEffect(
           </View>
 
           {recentTransactions.length === 0 ? (
-            <EmptyTransactions />
+            <EmptyTransactions colors={COLORS}/>
           ) : (
             recentTransactions.map((txn) => (
-              <TransactionItem key={txn.id} transaction={txn} />
+              <TransactionItem key={txn.id} transaction={txn} colors={COLORS}/>
             ))
           )}
         </View>
@@ -172,7 +175,7 @@ useFocusEffect(
 
 // ─── Account Card ─────────────────────────────────────────────────────────────
 
-function AccountCard({ account }: { account: Account }) {
+function AccountCard({ account, colors }: { account: Account; colors: any }) {
   const accountColors: Record<string, string> = {
     gift_card: "#6C63FF",
     cash: "#2ECC71",
@@ -193,7 +196,7 @@ function AccountCard({ account }: { account: Account }) {
     other: "dots-horizontal",
   };
 
-  const color = accountColors[account.type] || COLORS.primary;
+  const color = accountColors[account.type] || colors.primary;
   const icon = accountIcons[account.type] || "bank";
 
   return (
@@ -229,12 +232,12 @@ function AccountCard({ account }: { account: Account }) {
 
 // ─── Transaction Item ─────────────────────────────────────────────────────────
 
-function TransactionItem({ transaction }: { transaction: Transaction }) {
+function TransactionItem({ transaction, colors }: { transaction: Transaction; colors: any }) {
   const typeColors: Record<string, string> = {
-    income: COLORS.income,
-    expense: COLORS.expense,
-    investment: COLORS.investment,
-    self_transfer: COLORS.transfer,
+    income: colors.income,
+    expense: colors.expense,
+    investment: colors.investment,
+    self_transfer: colors.transfer,
   };
 
   const typeIcons: Record<string, string> = {
@@ -244,14 +247,14 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
     self_transfer: "swap-horizontal",
   };
 
-  const color = typeColors[transaction.type] || COLORS.primary;
+  const color = typeColors[transaction.type] || colors.primary;
   const icon = typeIcons[transaction.type] || "circle";
   const isIncome = transaction.type === "income";
 
   return (
     <View
       className="flex-row items-center rounded-2xl p-4 mb-3"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       <View
         className="w-10 h-10 rounded-full items-center justify-center mr-3"
@@ -262,12 +265,12 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
       <View className="flex-1">
         <Text
           className="text-sm font-semibold"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
           numberOfLines={1}
         >
           {transaction.note || transaction.type}
         </Text>
-        <Text className="text-xs mt-0.5" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
           {new Date(transaction.dateTime).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "short",
@@ -277,7 +280,7 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
       </View>
       <Text
         className="text-sm font-bold"
-        style={{ color: isIncome ? COLORS.income : COLORS.expense }}
+        style={{ color: isIncome ? colors.income : colors.expense }}
       >
         {isIncome ? "+" : "-"}₹{transaction.amount.toLocaleString("en-IN")}
       </Text>
@@ -287,23 +290,23 @@ function TransactionItem({ transaction }: { transaction: Transaction }) {
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
-function EmptyTransactions() {
+function EmptyTransactions({ colors }: { colors: any }) {
   return (
     <View className="items-center py-10">
       <MaterialCommunityIcons
         name="receipt"
         size={48}
-        color={COLORS.gray300}
+        color={colors.gray300}
       />
       <Text
         className="text-base font-semibold mt-3"
-        style={{ color: COLORS.textSecondary }}
+        style={{ color: colors.textSecondary }}
       >
         No transactions yet
       </Text>
       <Text
         className="text-sm text-center mt-1"
-        style={{ color: COLORS.textMuted }}
+        style={{ color: colors.textMuted }}
       >
         Tap the + button to add your first transaction
       </Text>

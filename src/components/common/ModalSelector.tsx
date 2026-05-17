@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 
 export interface ModalOption {
   id: string;
@@ -36,6 +37,7 @@ export default function ModalSelector({
   onSelect,
   onClose,
 }: ModalSelectorProps) {
+  const { colors: COLORS } = useThemeStore();
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {

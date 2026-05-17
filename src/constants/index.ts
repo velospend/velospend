@@ -316,3 +316,53 @@ export const CATEGORY_COLORS = [
   "#95A5A6", // Grey
   "#34495E", // Dark Grey
 ] as const;
+
+// ─── Dark Mode Colors ─────────────────────────────────────────────────────────
+
+export const DARK_COLORS = {
+  // Primary (same)
+  primary: "#6C63FF",
+  primaryLight: "#8B85FF",
+  primaryDark: "#4B44CC",
+
+  // Accent
+  accent: "#FF6584",
+
+  // Semantic (same)
+  income: "#2ECC71",
+  expense: "#E74C3C",
+  investment: "#F39C12",
+  transfer: "#3498DB",
+
+  // Neutrals
+  background: "#0F0F14",
+  surface: "#1A1A24",
+  border: "#2A2A38",
+
+  // Text
+  textPrimary: "#FFFFFF",
+  textSecondary: "#d3d3d3",
+  textMuted: "#606070",
+  textWhite: "#FFFFFF",
+
+  // Status (same)
+  success: "#2ECC71",
+  error: "#E74C3C",
+  warning: "#F39C12",
+  info: "#3498DB",
+
+  // Grayscale
+  gray100: "#1E1E2A",
+  gray200: "#252535",
+  gray300: "#303045",
+  gray400: "#505065",
+  gray500: "#707085",
+  gray600: "#9090A0",
+  gray700: "#B0B0C0",
+  gray800: "#D0D0E0",
+  gray900: "#F0F0F8",
+
+  // Transparent
+  transparent: "transparent",
+  overlay: "rgba(0, 0, 0, 0.7)",
+} as const;

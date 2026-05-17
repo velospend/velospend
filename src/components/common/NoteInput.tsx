@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 
 interface NoteInputProps {
   value: string;
@@ -20,6 +21,7 @@ export default function NoteInput({
   onChangeText,
   previousNotes,
 }: NoteInputProps) {
+  const { colors: COLORS } = useThemeStore();
   const [isFocused, setIsFocused] = useState(false);
 
   const suggestions = useMemo(() => {

@@ -12,9 +12,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 
 export default function SIPCalculatorScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
 
   const [monthlyInvestment, setMonthlyInvestment] = useState("");
   const [expectedReturn, setExpectedReturn] = useState("");
@@ -123,9 +125,9 @@ export default function SIPCalculatorScreen() {
           className="rounded-2xl p-4 mb-4"
           style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
         >
-          <CalcInput label="Monthly Investment (₹)" value={monthlyInvestment} onChangeText={setMonthlyInvestment} placeholder="e.g. 5000" color={color} />
-          <CalcInput label="Expected Annual Return (%)" value={expectedReturn} onChangeText={setExpectedReturn} placeholder="e.g. 12" color={color} />
-          <CalcInput label="Time Period (Years)" value={timePeriod} onChangeText={setTimePeriod} placeholder="e.g. 10" color={color} />
+          <CalcInput label="Monthly Investment (₹)" value={monthlyInvestment} onChangeText={setMonthlyInvestment} placeholder="e.g. 5000" colors={COLORS} />
+          <CalcInput label="Expected Annual Return (%)" value={expectedReturn} onChangeText={setExpectedReturn} placeholder="e.g. 12" colors={COLORS} />
+          <CalcInput label="Time Period (Years)" value={timePeriod} onChangeText={setTimePeriod} placeholder="e.g. 10" colors={COLORS} />
         </View>
 
         <View className="flex-row gap-3">
@@ -149,22 +151,22 @@ export default function SIPCalculatorScreen() {
   );
 }
 
-function CalcInput({ label, value, onChangeText, placeholder, color }: any) {
+function CalcInput({ label, value, onChangeText, placeholder, colors }: any) {
   return (
     <View className="mb-3">
-      <Text className="text-sm font-semibold mb-2" style={{ color: COLORS.textSecondary }}>{label}</Text>
+      <Text className="text-sm font-semibold mb-2" style={{ color: colors.textSecondary }}>{label}</Text>
       <View
         className="flex-row items-center rounded-xl px-3"
-        style={{ backgroundColor: COLORS.gray100, borderWidth: 1, borderColor: COLORS.border }}
+        style={{ backgroundColor: colors.gray100, borderWidth: 1, borderColor: colors.border }}
       >
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={colors.textMuted}
           keyboardType="decimal-pad"
           className="flex-1 py-3 text-base"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         />
       </View>
     </View>

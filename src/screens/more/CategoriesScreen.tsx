@@ -12,6 +12,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getCategoriesByUser, deleteCategory } from "../../database/queries/categories";
 import { useUserStore } from "../../store/useUserStore";
 import { Category, HomeStackParamList } from "../../types";
@@ -20,6 +21,7 @@ type CategoriesNavProp = StackNavigationProp<HomeStackParamList, "CategoriesScre
 
 export default function CategoriesScreen() {
   const navigation = useNavigation<CategoriesNavProp>();
+  const { colors: COLORS } = useThemeStore();
   const { user } = useUserStore();
   const [sections, setSections] = useState<{ title: string; data: Category[] }[]>([]);
 
@@ -142,6 +144,7 @@ export default function CategoriesScreen() {
               navigation.navigate("EditCategoryScreen", { categoryId: item.id })
             }
             onDelete={() => handleDelete(item)}
+            colors={COLORS}
           />
         )}
       />
@@ -156,18 +159,20 @@ function CategoryItem({
   isLast,
   onEdit,
   onDelete,
+  colors
 }: {
   category: Category;
   isLast: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  colors: any;
 }) {
   return (
     <View
       style={{
-        backgroundColor: COLORS.surface,
+        backgroundColor: colors.surface,
         ...(!isLast
-          ? { borderBottomWidth: 1, borderBottomColor: COLORS.border }
+          ? { borderBottomWidth: 1, borderBottomColor: colors.border }
           : {}),
         ...(isLast ? { borderBottomLeftRadius: 16, borderBottomRightRadius: 16 } : {}),
         ...(!isLast ? {} : {}),
@@ -194,12 +199,12 @@ function CategoryItem({
         <View className="flex-1">
           <Text
             className="text-sm font-semibold"
-            style={{ color: COLORS.textPrimary }}
+            style={{ color: colors.textPrimary }}
           >
             {category.name}
           </Text>
           {category.isDefault && (
-            <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+            <Text className="text-xs" style={{ color: colors.textMuted }}>
               Default
             </Text>
           )}
@@ -210,23 +215,23 @@ function CategoryItem({
               <TouchableOpacity
                 onPress={onEdit}
                 className="w-7 h-7 rounded-full items-center justify-center"
-                style={{ backgroundColor: COLORS.primary + "20" }}
+                style={{ backgroundColor: colors.primary + "20" }}
               >
                 <MaterialCommunityIcons
                   name="pencil"
                   size={14}
-                  color={COLORS.primary}
+                  color={colors.primary}
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={onDelete}
                 className="w-7 h-7 rounded-full items-center justify-center"
-                style={{ backgroundColor: COLORS.error + "20" }}
+                style={{ backgroundColor: colors.error + "20" }}
               >
                 <MaterialCommunityIcons
                   name="trash-can"
                   size={14}
-                  color={COLORS.error}
+                  color={colors.error}
                 />
               </TouchableOpacity>
             </View>

@@ -13,12 +13,14 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS, INVESTMENT_TYPES, RECURRENCE_PERIODS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { createInvestment, updateInvestment, getInvestmentById } from "../../database/queries/investments";
 import { useUserStore } from "../../store/useUserStore";
 import { InvestmentType, RecurringType, RecurrencePeriod } from "../../types";
 
 export default function AddInvestmentScreen() {
   const navigation = useNavigation();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute();
   const { user } = useUserStore();
 

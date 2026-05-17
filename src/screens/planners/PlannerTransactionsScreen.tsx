@@ -10,6 +10,7 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navig
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getTransactionsByPlanner } from "../../database/queries/transactions";
 import { Transaction, PlannerStackParamList } from "../../types";
 
@@ -24,6 +25,7 @@ interface GroupedTransactions {
 export default function PlannerTransactionsScreen() {
   const navigation = useNavigation<NavProp>();
   const route = useRoute<RoutePropType>();
+  const { colors: COLORS } = useThemeStore();
   const { plannerId, categoryId, categoryName, plannerTitle } = route.params;
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -172,6 +174,7 @@ export default function PlannerTransactionsScreen() {
                     key={txn.id}
                     transaction={txn}
                     isLast={index === group.data.length - 1}
+                    colors={COLORS}
                   />
                 ))}
               </View>
@@ -188,15 +191,17 @@ export default function PlannerTransactionsScreen() {
 function TransactionRow({
   transaction,
   isLast,
+  colors
 }: {
   transaction: Transaction;
   isLast: boolean;
+  colors: any;
 }) {
   const typeColors: Record<string, string> = {
-    income: COLORS.income,
-    expense: COLORS.expense,
-    investment: COLORS.investment,
-    self_transfer: COLORS.transfer,
+    income: colors.income,
+    expense: colors.expense,
+    investment: colors.investment,
+    self_transfer: colors.transfer,
   };
 
   const typeIcons: Record<string, string> = {
@@ -206,7 +211,7 @@ function TransactionRow({
     self_transfer: "swap-horizontal",
   };
 
-  const color = typeColors[transaction.type] || COLORS.primary;
+  const color = typeColors[transaction.type] || colors.primary;
   const icon = typeIcons[transaction.type] || "circle";
   const isIncome = transaction.type === "income";
 
@@ -215,7 +220,7 @@ function TransactionRow({
       className="flex-row items-center px-4 py-3"
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: COLORS.border,
+        borderBottomColor: colors.border,
       }}
     >
       <View
@@ -227,12 +232,12 @@ function TransactionRow({
       <View className="flex-1">
         <Text
           className="text-sm font-semibold"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
           numberOfLines={1}
         >
           {transaction.note || transaction.type}
         </Text>
-        <Text className="text-xs mt-0.5" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
           {new Date(transaction.dateTime).toLocaleString("en-IN", {
             day: "numeric",
             month: "short",
@@ -243,7 +248,7 @@ function TransactionRow({
         {transaction.description && (
           <Text
             className="text-xs mt-0.5"
-            style={{ color: COLORS.textMuted }}
+            style={{ color: colors.textMuted }}
             numberOfLines={1}
           >
             {transaction.description}
@@ -252,7 +257,7 @@ function TransactionRow({
       </View>
       <Text
         className="text-sm font-bold"
-        style={{ color: isIncome ? COLORS.income : COLORS.expense }}
+        style={{ color: isIncome ? colors.income : colors.expense }}
       >
         {isIncome ? "+" : "-"}₹{transaction.amount.toLocaleString("en-IN")}
       </Text>

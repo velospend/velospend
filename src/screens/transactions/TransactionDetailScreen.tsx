@@ -11,6 +11,7 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navig
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { getTransactionById, deleteTransaction } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
@@ -30,6 +31,7 @@ const TYPE_CONFIG: Record<string, { color: string; icon: string; label: string }
 
 export default function TransactionDetailScreen() {
   const navigation = useNavigation<DetailNavProp>();
+  const { colors: COLORS } = useThemeStore();
   const route = useRoute<DetailRouteProp>();
   const { transactionId } = route.params;
   const { user, loadAccounts } = useUserStore();
@@ -166,17 +168,20 @@ export default function TransactionDetailScreen() {
               hour: "2-digit",
               minute: "2-digit",
             })}
+            colors={COLORS}
           />
           <DetailRow
             icon="bank"
             label={transaction.type === "self_transfer" ? "From Account" : "Account"}
             value={accountName}
+            colors={COLORS}
           />
           {transaction.type === "self_transfer" && toAccountName && (
             <DetailRow
               icon="bank-transfer"
               label="To Account"
               value={toAccountName}
+              colors={COLORS}
             />
           )}
           {transaction.type !== "self_transfer" && categoryName && (
@@ -186,6 +191,7 @@ export default function TransactionDetailScreen() {
               value={categoryName}
               iconColor={categoryColor}
               isLast={!plannerTitle}
+              colors={COLORS}
             />
           )}
           {plannerTitle && (
@@ -194,6 +200,7 @@ export default function TransactionDetailScreen() {
               label="Planner"
               value={plannerTitle}
               isLast
+              colors={COLORS}
             />
           )}
         </View>
@@ -266,38 +273,40 @@ function DetailRow({
   value,
   iconColor,
   isLast,
+  colors
 }: {
   icon: string;
   label: string;
   value: string;
   iconColor?: string;
   isLast?: boolean;
+  colors: any;
 }) {
   return (
     <View
       className="flex-row items-center px-4 py-3"
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: COLORS.border,
+        borderBottomColor: colors.border,
       }}
     >
       <View
         className="w-8 h-8 rounded-full items-center justify-center mr-3"
-        style={{ backgroundColor: (iconColor || COLORS.primary) + "20" }}
+        style={{ backgroundColor: (iconColor || colors.primary) + "20" }}
       >
         <MaterialCommunityIcons
           name={icon as any}
           size={16}
-          color={iconColor || COLORS.primary}
+          color={iconColor || colors.primary}
         />
       </View>
       <View className="flex-1">
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           {label}
         </Text>
         <Text
           className="text-sm font-semibold mt-0.5"
-          style={{ color: COLORS.textPrimary }}
+          style={{ color: colors.textPrimary }}
         >
           {value}
         </Text>

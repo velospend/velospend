@@ -13,6 +13,7 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navig
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import {
   getPlannerById,
   getPlannerRecords,
@@ -43,6 +44,7 @@ export default function PlannerDetailScreen() {
   const route = useRoute<DetailRouteProp>();
   const { plannerId } = route.params;
   const { user } = useUserStore();
+  const { colors: COLORS } = useThemeStore();
 
   const [planner, setPlanner] = useState<Planner | null>(null);
   const [records, setRecords] = useState<RecordWithMeta[]>([]);
@@ -299,6 +301,7 @@ export default function PlannerDetailScreen() {
     plannerTitle: planner.title,
   })
 }
+colors={COLORS}
             />
           ))
         )}
@@ -478,28 +481,30 @@ function PlannerRecordCard({
   onEdit,
   onDelete,
   onViewTransactions,
+  colors
 }: {
   record: RecordWithMeta;
   plannerType: string;
   onEdit: () => void;
   onDelete: () => void;
   onViewTransactions: () => void;
+  colors: any;
 }) {
   const percent = record.plannedAmount > 0
     ? Math.min((record.usedAmount / record.plannedAmount) * 100, 100)
     : 0;
   const progressColor = percent >= 100
-    ? COLORS.error
+    ? colors.error
     : percent >= 80
-    ? COLORS.warning
-    : COLORS.income;
+    ? colors.warning
+    : colors.income;
   const remaining = record.plannedAmount - record.usedAmount;
 
   return (
     <TouchableOpacity
       onPress={onViewTransactions}
       className="rounded-2xl p-4 mb-3"
-      style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+      style={{ backgroundColor: colors.surface, ...SHADOWS.sm }}
     >
       {/* Top Row */}
       <View className="flex-row items-center justify-between mb-3">
@@ -517,14 +522,14 @@ function PlannerRecordCard({
           <View className="flex-1">
             <Text
               className="text-sm font-bold"
-              style={{ color: COLORS.textPrimary }}
+              style={{ color: colors.textPrimary }}
             >
               {record.categoryName}
             </Text>
             {record.note && (
               <Text
                 className="text-xs mt-0.5"
-                style={{ color: COLORS.textMuted }}
+                style={{ color: colors.textMuted }}
                 numberOfLines={1}
               >
                 {record.note}
@@ -536,31 +541,31 @@ function PlannerRecordCard({
           <TouchableOpacity
             onPress={onEdit}
             className="w-7 h-7 rounded-full items-center justify-center"
-            style={{ backgroundColor: COLORS.primary + "20" }}
+            style={{ backgroundColor: colors.primary + "20" }}
           >
-            <MaterialCommunityIcons name="pencil" size={14} color={COLORS.primary} />
+            <MaterialCommunityIcons name="pencil" size={14} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onDelete}
             className="w-7 h-7 rounded-full items-center justify-center"
-            style={{ backgroundColor: COLORS.error + "20" }}
+            style={{ backgroundColor: colors.error + "20" }}
           >
-            <MaterialCommunityIcons name="trash-can" size={14} color={COLORS.error} />
+            <MaterialCommunityIcons name="trash-can" size={14} color={colors.error} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Amount Row */}
       <View className="flex-row justify-between mb-2">
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           {plannerType === "expense" ? "Spent" : "Earned"}:{" "}
-          <Text className="font-bold" style={{ color: COLORS.textPrimary }}>
+          <Text className="font-bold" style={{ color: colors.textPrimary }}>
             ₹{record.usedAmount.toLocaleString("en-IN")}
           </Text>
         </Text>
-        <Text className="text-xs" style={{ color: COLORS.textMuted }}>
+        <Text className="text-xs" style={{ color: colors.textMuted }}>
           Planned:{" "}
-          <Text className="font-bold" style={{ color: COLORS.textPrimary }}>
+          <Text className="font-bold" style={{ color: colors.textPrimary }}>
             ₹{record.plannedAmount.toLocaleString("en-IN")}
           </Text>
         </Text>
@@ -569,7 +574,7 @@ function PlannerRecordCard({
       {/* Progress Bar */}
       <View
         className="h-1.5 rounded-full overflow-hidden mb-1"
-        style={{ backgroundColor: COLORS.gray200 }}
+        style={{ backgroundColor: colors.gray200 }}
       >
         <View
           className="h-full rounded-full"
@@ -582,7 +587,7 @@ function PlannerRecordCard({
         <Text className="text-xs font-semibold" style={{ color: progressColor }}>
           {percent.toFixed(1)}%
         </Text>
-        <Text className="text-xs" style={{ color: remaining >= 0 ? COLORS.income : COLORS.expense }}>
+        <Text className="text-xs" style={{ color: remaining >= 0 ? colors.income : colors.expense }}>
           {remaining >= 0
             ? `₹${remaining.toLocaleString("en-IN")} remaining`
             : `₹${Math.abs(remaining).toLocaleString("en-IN")} over budget`}

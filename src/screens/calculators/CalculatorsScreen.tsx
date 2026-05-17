@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { CalculatorStackParamList } from "../../types";
 
 type CalcNavProp = StackNavigationProp<CalculatorStackParamList, "CalculatorsScreen">;
@@ -57,6 +58,7 @@ const CALCULATORS = [
 ];
 
 export default function CalculatorsScreen() {
+  const { colors: COLORS } = useThemeStore();
   const navigation = useNavigation<CalcNavProp>();
 
   return (

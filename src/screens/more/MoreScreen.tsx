@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "../../constants";
+import { useThemeStore } from "../../store/useThemeStore";
 import { useUserStore } from "../../store/useUserStore";
 import { HomeStackParamList } from "../../types";
 
@@ -43,6 +44,7 @@ const MENU_SECTIONS = [
 
 export default function MoreScreen() {
   const navigation = useNavigation<MoreNavProp>();
+  const { colors: COLORS } = useThemeStore();
   const { user } = useUserStore();
 
   return (
