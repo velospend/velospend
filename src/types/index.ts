@@ -246,3 +246,10 @@ export type ReportsStackParamList = {
 export type RootStackParamList = {
   MainApp: undefined;
 };
+
+export interface TransactionWithMeta extends Transaction {
+  accountName: string;
+  categoryName: string;
+  categoryIcon: string;
+  categoryColor: string;
+}

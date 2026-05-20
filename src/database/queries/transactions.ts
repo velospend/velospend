@@ -1,5 +1,5 @@
 import { getDatabase } from "../db";
-import { Transaction } from "../../types";
+import { Transaction, TransactionWithMeta } from "../../types";
 import uuid from "react-native-uuid";
 import { updateAccountBalance } from "./accounts";
 
@@ -251,4 +251,89 @@ export const updateTransaction = (
       updateAccountBalance(data.toAccountId, data.amount!, "add");
     }
   }
+};
+
+export const getFilteredTransactionsWithMeta = (
+  userId: string,
+  filters: {
+    type?: string;
+    accountId?: string;
+    categoryId?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+): TransactionWithMeta[] => {
+  const db = getDatabase();
+
+  let query = `
+    SELECT t.*,
+      a.name as account_name,
+      c.name as category_name,
+      c.icon as category_icon,
+      c.color as category_color
+    FROM transactions t
+    LEFT JOIN accounts a ON t.account_id = a.id
+    LEFT JOIN categories c ON t.category_id = c.id
+    WHERE t.user_id = ? AND t.is_archived = 0
+  `;
+  const params: any[] = [userId];
+
+  if (filters.type) {
+    query += ` AND t.type = ?`;
+    params.push(filters.type);
+  }
+  if (filters.accountId) {
+    query += ` AND t.account_id = ?`;
+    params.push(filters.accountId);
+  }
+  if (filters.categoryId) {
+    query += ` AND t.category_id = ?`;
+    params.push(filters.categoryId);
+  }
+  if (filters.startDate) {
+    query += ` AND t.date_time >= ?`;
+    params.push(filters.startDate);
+  }
+  if (filters.endDate) {
+    query += ` AND t.date_time <= ?`;
+    params.push(filters.endDate);
+  }
+
+  query += ` ORDER BY t.date_time DESC`;
+
+  const rows = db.getAllSync<any>(query, params);
+  return rows.map((row) => ({
+    ...mapTransaction(row),
+    accountName: row.account_name || "Unknown",
+    categoryName: row.category_name || "",
+    categoryIcon: row.category_icon || "",
+    categoryColor: row.category_color || "",
+  }));
+};
+
+export const getRecentTransactionsWithMeta = (
+  userId: string,
+  limit: number = 5
+): TransactionWithMeta[] => {
+  const db = getDatabase();
+  const rows = db.getAllSync<any>(
+    `SELECT t.*,
+      a.name as account_name,
+      c.name as category_name,
+      c.icon as category_icon,
+      c.color as category_color
+     FROM transactions t
+     LEFT JOIN accounts a ON t.account_id = a.id
+     LEFT JOIN categories c ON t.category_id = c.id
+     WHERE t.user_id = ? AND t.is_archived = 0
+     ORDER BY t.date_time DESC LIMIT ?`,
+    [userId, limit]
+  );
+  return rows.map((row) => ({
+    ...mapTransaction(row),
+    accountName: row.account_name || "Unknown",
+    categoryName: row.category_name || "",
+    categoryIcon: row.category_icon || "",
+    categoryColor: row.category_color || "",
+  }));
 };

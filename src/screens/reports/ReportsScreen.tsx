@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Svg, { Rect, Text as SvgText, G, Circle, Path } from "react-native-svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
 import { useThemeStore } from "../../store/useThemeStore";
@@ -22,8 +21,11 @@ import {
   ReportSummary,
   MonthlySummary,
   CategorySummary,
+  getAccountSpending,
 } from "../../database/queries/reports";
 import { useUserStore } from "../../store/useUserStore";
+import { getDailyData, getAccountBalances, DailyData, AccountBalance } from "../../database/queries/reports";
+import { Svg, Path, Circle, Line, Text as SvgText, G, Rect } from "react-native-svg";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -57,30 +59,35 @@ export default function ReportsScreen() {
   const [incomeCategories, setIncomeCategories] = useState<CategorySummary[]>([]);
   const [categoryChartType, setCategoryChartType] = useState<"donut" | "bar">("bar");
   const [activeCategoryTab, setActiveCategoryTab] = useState<"expense" | "income">("expense");
+  const [dailyData, setDailyData] = useState<DailyData[]>([]);
+  const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
+  const [accountChartType, setAccountChartType] = useState<"donut" | "bar">("bar");
 
   const loadReports = useCallback(() => {
-    if (!user) return;
+  if (!user) return;
 
-    let startDate: Date;
-    let endDate: Date;
+  let startDate: Date;
+  let endDate: Date;
 
-    if (period === "custom") {
-      startDate = customStart;
-      endDate = customEnd;
-    } else {
-      const range = getDateRange(period);
-      startDate = range.startDate;
-      endDate = range.endDate;
-    }
+  if (period === "custom") {
+    startDate = customStart;
+    endDate = customEnd;
+  } else {
+    const range = getDateRange(period);
+    startDate = range.startDate;
+    endDate = range.endDate;
+  }
 
-    const start = startDate.toISOString();
-    const end = endDate.toISOString();
+  const start = startDate.toISOString();
+  const end = endDate.toISOString();
 
-    setSummary(getReportSummary(user.id, start, end));
-    setMonthlySummary(getMonthlySummary(user.id, start, end));
-    setExpenseCategories(getCategorySummary(user.id, start, end, "expense"));
-    setIncomeCategories(getCategorySummary(user.id, start, end, "income"));
-  }, [user, period, customStart, customEnd]);
+  setSummary(getReportSummary(user.id, start, end));
+  setMonthlySummary(getMonthlySummary(user.id, start, end));
+  setExpenseCategories(getCategorySummary(user.id, start, end, "expense"));
+  setIncomeCategories(getCategorySummary(user.id, start, end, "income"));
+  setDailyData(getDailyData(user.id, start, end));
+  setAccountBalances(getAccountSpending(user.id, start, end));
+}, [user, period, customStart, customEnd]);
 
   useFocusEffect(
     useCallback(() => {
@@ -351,6 +358,95 @@ export default function ReportsScreen() {
   <HorizontalBarChart categories={activeCategories} colors={COLORS} />
 )}
         </View>
+
+        {/* Day-wise Income vs Expense Line Chart */}
+{dailyData.length > 0 && (
+  <View
+    className="rounded-2xl p-4 mb-4"
+    style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+  >
+    <Text
+      className="text-sm font-bold mb-1"
+      style={{ color: COLORS.textPrimary }}
+    >
+      Daily Income vs Expense
+    </Text>
+    <Text
+      className="text-xs mb-4"
+      style={{ color: COLORS.textMuted }}
+    >
+      Day-wise breakdown for selected period
+    </Text>
+    <DailyLineChart data={dailyData} colors={COLORS} />
+    {/* Legend */}
+    <View className="flex-row justify-center gap-4 mt-3">
+      <View className="flex-row items-center gap-1">
+        <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.income }} />
+        <Text className="text-xs" style={{ color: COLORS.textMuted }}>Income</Text>
+      </View>
+      <View className="flex-row items-center gap-1">
+        <View className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.expense }} />
+        <Text className="text-xs" style={{ color: COLORS.textMuted }}>Expense</Text>
+      </View>
+    </View>
+  </View>
+)}
+
+{/* Account-wise Balance */}
+{accountBalances.length > 0 && (
+  <View
+    className="rounded-2xl p-4 mb-4"
+    style={{ backgroundColor: COLORS.surface, ...SHADOWS.sm }}
+  >
+    <View className="flex-row items-center justify-between mb-3">
+     <Text className="text-sm font-bold" style={{ color: COLORS.textPrimary }}>
+  Spending by Account
+</Text>
+      {/* Chart Type Toggle */}
+      <View
+        className="flex-row rounded-xl overflow-hidden"
+        style={{ backgroundColor: COLORS.gray100 }}
+      >
+        <TouchableOpacity
+          onPress={() => setAccountChartType("bar")}
+          className="px-3 py-1.5"
+          style={{
+            backgroundColor: accountChartType === "bar"
+              ? COLORS.primary
+              : "transparent",
+          }}
+        >
+          <MaterialCommunityIcons
+            name="chart-bar"
+            size={16}
+            color={accountChartType === "bar" ? "white" : COLORS.gray400}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setAccountChartType("donut")}
+          className="px-3 py-1.5"
+          style={{
+            backgroundColor: accountChartType === "donut"
+              ? COLORS.primary
+              : "transparent",
+          }}
+        >
+          <MaterialCommunityIcons
+            name="chart-donut"
+            size={16}
+            color={accountChartType === "donut" ? "white" : COLORS.gray400}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+
+    {accountChartType === "donut" ? (
+      <AccountDonutChart balances={accountBalances} colors={COLORS} />
+    ) : (
+      <AccountBarChart balances={accountBalances} colors={COLORS} />
+    )}
+  </View>
+)}
 
         {/* Top Spending Categories */}
         {expenseCategories.length > 0 && (
@@ -840,5 +936,271 @@ function CustomBarChart({ data }: { data: MonthlySummary[] }) {
         );
       })}
     </Svg>
+  );
+}
+
+// ─── Daily Line Chart ─────────────────────────────────────────────────────────
+
+function DailyLineChart({ data, colors }: { data: DailyData[]; colors: any }) {
+  const chartWidth = SCREEN_WIDTH - 64;
+  const chartHeight = 180;
+  const paddingLeft = 45;
+  const paddingBottom = 25;
+  const paddingTop = 10;
+  const chartAreaWidth = chartWidth - paddingLeft;
+  const chartAreaHeight = chartHeight - paddingBottom - paddingTop;
+
+  const maxValue = Math.max(
+    ...data.map((d) => Math.max(d.income, d.expense)),
+    1
+  );
+
+  const minDay = Math.min(...data.map((d) => d.day));
+  const maxDay = Math.max(...data.map((d) => d.day));
+  const dayRange = maxDay - minDay || 1;
+
+  const getX = (day: number) =>
+    paddingLeft + ((day - minDay) / dayRange) * chartAreaWidth;
+
+  const getY = (value: number) =>
+    paddingTop + chartAreaHeight - (value / maxValue) * chartAreaHeight;
+
+  const buildPath = (values: { day: number; value: number }[]) => {
+    if (values.length === 0) return "";
+    return values
+      .map((v, i) => `${i === 0 ? "M" : "L"} ${getX(v.day)} ${getY(v.value)}`)
+      .join(" ");
+  };
+
+  const incomePath = buildPath(data.map((d) => ({ day: d.day, value: d.income })));
+  const expensePath = buildPath(data.map((d) => ({ day: d.day, value: d.expense })));
+
+  const yLabels = [0, 0.5, 1].map((ratio) => Math.round(maxValue * ratio));
+
+  return (
+    <Svg width={chartWidth} height={chartHeight}>
+      {/* Y axis labels and grid */}
+      {yLabels.map((val, i) => {
+        const y = getY(val);
+        return (
+          <G key={i}>
+            <SvgText
+              x={paddingLeft - 6}
+              y={y + 4}
+              fontSize="9"
+              fill={colors.textMuted}
+              textAnchor="end"
+            >
+              {val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}
+            </SvgText>
+            <Line
+              x1={paddingLeft}
+              y1={y}
+              x2={chartWidth}
+              y2={y}
+              stroke={colors.border}
+              strokeWidth={0.5}
+            />
+          </G>
+        );
+      })}
+
+      {/* Income line */}
+      {incomePath && (
+        <Path
+          d={incomePath}
+          stroke={colors.income}
+          strokeWidth={2}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* Expense line */}
+      {expensePath && (
+        <Path
+          d={expensePath}
+          stroke={colors.expense}
+          strokeWidth={2}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* Data points */}
+      {data.map((d, i) => (
+        <G key={i}>
+          <Circle
+            cx={getX(d.day)}
+            cy={getY(d.income)}
+            r={3}
+            fill={colors.income}
+          />
+          <Circle
+            cx={getX(d.day)}
+            cy={getY(d.expense)}
+            r={3}
+            fill={colors.expense}
+          />
+          {/* Day label */}
+          {(i === 0 || i === data.length - 1 || i % Math.ceil(data.length / 5) === 0) && (
+            <SvgText
+              x={getX(d.day)}
+              y={chartHeight - 8}
+              fontSize="9"
+              fill={colors.textMuted}
+              textAnchor="middle"
+            >
+              {d.day}
+            </SvgText>
+          )}
+        </G>
+      ))}
+    </Svg>
+  );
+}
+
+// ─── Account Donut Chart ──────────────────────────────────────────────────────
+
+function AccountDonutChart({ balances, colors }: { balances: AccountBalance[]; colors: any }) {
+  const total = balances.reduce((sum, b) => sum + b.balance, 0);
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 60;
+  const innerRadius = 38;
+
+  const accountColors = [
+    "#6C63FF", "#2ECC71", "#F39C12", "#3498DB",
+    "#E74C3C", "#9B59B6", "#1ABC9C", "#E67E22",
+  ];
+
+  let currentAngle = -90;
+  const segments = balances.map((bal, index) => {
+    const percentage = total > 0 ? bal.balance / total : 0;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + percentage * 360;
+    currentAngle = endAngle;
+
+    const start = polarToCartesian(cx, cy, radius, startAngle);
+    const end = polarToCartesian(cx, cy, radius, endAngle);
+    const largeArc = percentage > 0.5 ? 1 : 0;
+    const innerStart = polarToCartesian(cx, cy, innerRadius, endAngle);
+    const innerEnd = polarToCartesian(cx, cy, innerRadius, startAngle);
+
+    const d = [
+      `M ${start.x} ${start.y}`,
+      `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`,
+      `L ${innerStart.x} ${innerStart.y}`,
+      `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerEnd.x} ${innerEnd.y}`,
+      "Z",
+    ].join(" ");
+
+    return { ...bal, d, color: accountColors[index % accountColors.length] };
+  });
+
+  return (
+    <View>
+      <View className="items-center mb-4">
+        <Svg width={size} height={size}>
+          {segments.map((seg, i) => (
+            <Path key={i} d={seg.d} fill={seg.color} />
+          ))}
+          <Circle cx={cx} cy={cy} r={innerRadius - 2} fill={colors.surface} />
+          <SvgText
+            x={cx} y={cy - 6}
+            fontSize="10"
+            fill={colors.textMuted}
+            textAnchor="middle"
+          >
+            Total
+          </SvgText>
+          <SvgText
+            x={cx} y={cy + 10}
+            fontSize="11"
+            fontWeight="bold"
+            fill={colors.textPrimary}
+            textAnchor="middle"
+          >
+            ₹{(total / 1000).toFixed(0)}k
+          </SvgText>
+        </Svg>
+      </View>
+      {segments.map((seg) => (
+        <View key={seg.accountId} className="flex-row items-center mb-2">
+          <View
+            className="w-3 h-3 rounded-full mr-2"
+            style={{ backgroundColor: seg.color }}
+          />
+          <Text className="flex-1 text-sm" style={{ color: colors.textPrimary }}>
+            {seg.accountName}
+          </Text>
+          <Text className="text-sm font-bold" style={{ color: colors.textPrimary }}>
+            ₹{seg.balance.toLocaleString("en-IN")}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ─── Account Bar Chart ────────────────────────────────────────────────────────
+
+function AccountBarChart({ balances, colors }: { balances: AccountBalance[]; colors: any }) {
+  const accountColors = [
+    "#6C63FF", "#2ECC71", "#F39C12", "#3498DB",
+    "#E74C3C", "#9B59B6", "#1ABC9C", "#E67E22",
+  ];
+
+  return (
+    <View>
+      {balances.map((bal, index) => (
+        <View key={bal.accountId} className="mb-3">
+          <View className="flex-row items-center justify-between mb-1">
+            <View className="flex-row items-center gap-2">
+              <View
+                className="w-6 h-6 rounded-lg items-center justify-center"
+                style={{ backgroundColor: accountColors[index % accountColors.length] + "20" }}
+              >
+                <MaterialCommunityIcons
+                  name="bank"
+                  size={12}
+                  color={accountColors[index % accountColors.length]}
+                />
+              </View>
+              <Text
+                className="text-sm font-semibold"
+                style={{ color: colors.textPrimary }}
+              >
+                {bal.accountName}
+              </Text>
+            </View>
+            <Text className="text-sm font-bold" style={{ color: colors.textPrimary }}>
+              ₹{bal.balance.toLocaleString("en-IN")}
+            </Text>
+          </View>
+          <View
+            className="h-2 rounded-full overflow-hidden"
+            style={{ backgroundColor: colors.gray200 }}
+          >
+            <View
+              className="h-full rounded-full"
+              style={{
+                width: `${Math.max(bal.percentage, 1)}%`,
+                backgroundColor: accountColors[index % accountColors.length],
+              }}
+            />
+          </View>
+          <Text
+            className="text-xs mt-0.5 text-right"
+            style={{ color: colors.textMuted }}
+          >
+            {bal.percentage.toFixed(1)}%
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }

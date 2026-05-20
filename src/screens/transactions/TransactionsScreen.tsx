@@ -14,11 +14,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
 import { useThemeStore } from "../../store/useThemeStore";
-import { getFilteredTransactions } from "../../database/queries/transactions";
+import { getFilteredTransactions, getFilteredTransactionsWithMeta } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
 import { useUserStore } from "../../store/useUserStore";
-import { Transaction, HomeStackParamList } from "../../types";
+import { Transaction, HomeStackParamList, TransactionWithMeta } from "../../types";
 
 type TransactionsNavProp = StackNavigationProp<HomeStackParamList, "TransactionsScreen">;
 
@@ -32,7 +32,7 @@ const TYPE_FILTERS = [
 
 interface GroupedTransactions {
   title: string;
-  data: Transaction[];
+  data: TransactionWithMeta[];
 }
 
 export default function TransactionsScreen() {
@@ -40,7 +40,7 @@ export default function TransactionsScreen() {
   const { user, accounts } = useUserStore();
   const { colors: COLORS } = useThemeStore();
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionWithMeta[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState("");
@@ -53,14 +53,14 @@ export default function TransactionsScreen() {
 
   const loadTransactions = useCallback(() => {
     if (!user) return;
-    const results = getFilteredTransactions(user.id, {
-      type: selectedType || undefined,
-      accountId: selectedAccountId || undefined,
-      categoryId: selectedCategoryId || undefined,
-      startDate: startDate?.toISOString(),
-      endDate: endDate?.toISOString(),
-    });
-    setTransactions(results);
+    const results = getFilteredTransactionsWithMeta(user.id, {
+  type: selectedType || undefined,
+  accountId: selectedAccountId || undefined,
+  categoryId: selectedCategoryId || undefined,
+  startDate: startDate?.toISOString(),
+  endDate: endDate?.toISOString(),
+});
+setTransactions(results);
   }, [user, selectedType, selectedAccountId, selectedCategoryId, startDate, endDate]);
 
   useFocusEffect(
@@ -75,7 +75,7 @@ export default function TransactionsScreen() {
   // ─── Group transactions by date ───────────────────────────────────────────
 
   const grouped: GroupedTransactions[] = useMemo(() => {
-    const map = new Map<string, Transaction[]>();
+    const map = new Map<string, TransactionWithMeta[]>();
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -290,7 +290,6 @@ export default function TransactionsScreen() {
                     <TransactionRow
                       key={txn.id}
                       transaction={txn}
-                      category={category}
                       isLast={index === group.data.length - 1}
                       onPress={() =>
                         navigation.navigate("TransactionDetailScreen", {
@@ -362,22 +361,22 @@ function SummaryChip({ label, amount, colors }: { label: string; amount: number;
 
 function TransactionRow({
   transaction,
-  category,
   isLast,
   onPress,
   colors
 }: {
-  transaction: Transaction;
-  category: any;
+  transaction: TransactionWithMeta;
   isLast: boolean;
   onPress: () => void;
   colors: any;
 }) {
+  const { colors: COLORS } = useThemeStore();
+
   const typeColors: Record<string, string> = {
-    income: colors.income,
-    expense: colors.expense,
-    investment: colors.investment,
-    self_transfer: colors.transfer,
+    income: COLORS.income,
+    expense: COLORS.expense,
+    investment: COLORS.investment,
+    self_transfer: COLORS.transfer,
   };
 
   const typeIcons: Record<string, string> = {
@@ -387,8 +386,8 @@ function TransactionRow({
     self_transfer: "swap-horizontal",
   };
 
-  const color = category?.color || typeColors[transaction.type] || colors.primary;
-  const icon = category?.icon || typeIcons[transaction.type] || "circle";
+  const color = transaction.categoryColor || typeColors[transaction.type] || COLORS.primary;
+  const icon = transaction.categoryIcon || typeIcons[transaction.type] || "circle";
   const isIncome = transaction.type === "income";
 
   return (
@@ -397,7 +396,7 @@ function TransactionRow({
       className="flex-row items-center px-4 py-3"
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: colors.border,
+        borderBottomColor: COLORS.border,
       }}
     >
       <View
@@ -407,24 +406,33 @@ function TransactionRow({
         <MaterialCommunityIcons name={icon as any} size={20} color={color} />
       </View>
       <View className="flex-1">
-        <Text
-          className="text-sm font-semibold"
-          style={{ color: colors.textPrimary }}
-          numberOfLines={1}
-        >
-          {transaction.note || category?.name || transaction.type}
-        </Text>
-        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
-          {new Date(transaction.dateTime).toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-          {category ? ` · ${category.name}` : ""}
-        </Text>
-      </View>
+  <Text
+    className="text-sm font-semibold"
+    style={{ color: COLORS.textPrimary }}
+    numberOfLines={1}
+  >
+    {transaction.categoryName || transaction.type}
+  </Text>
+  {transaction.note && (
+    <Text
+      className="text-xs"
+      style={{ color: COLORS.textSecondary }}
+      numberOfLines={1}
+    >
+      {transaction.note}
+    </Text>
+  )}
+  <Text className="text-xs mt-0.5" style={{ color: COLORS.textMuted }}>
+    {transaction.accountName} · {new Date(transaction.dateTime).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}
+  </Text>
+</View>
       <Text
         className="text-sm font-bold"
-        style={{ color: isIncome ? colors.income : colors.expense }}
+        style={{ color: isIncome ? COLORS.income : COLORS.expense }}
       >
         {isIncome ? "+" : "-"}₹{transaction.amount.toLocaleString("en-IN")}
       </Text>
@@ -617,7 +625,7 @@ function FilterChip({ label, isSelected, onPress, colors }: { label: string; isS
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="px-4 py-2 rounded-full"
+      className="px-4 py-2 mr-1 rounded-full"
       style={{
         backgroundColor: isSelected ? colors.primary : colors.gray100,
         borderWidth: 1,

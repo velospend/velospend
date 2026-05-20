@@ -15,7 +15,7 @@ import { COLORS, SHADOWS, SPACING, RADIUS } from "../../constants";
 import { useThemeStore } from "../../store/useThemeStore";
 import { useUserStore } from "../../store/useUserStore";
 import { useTransactionStore } from "../../store/useTransactionStore";
-import { Account, Transaction } from "../../types";
+import { Account, Transaction, TransactionWithMeta } from "../../types";
 import { HomeStackParamList } from "../../types";
 
 type HomeNavProp = StackNavigationProp<HomeStackParamList, "HomeScreen">;
@@ -232,7 +232,9 @@ function AccountCard({ account, colors }: { account: Account; colors: any }) {
 
 // ─── Transaction Item ─────────────────────────────────────────────────────────
 
-function TransactionItem({ transaction, colors }: { transaction: Transaction; colors: any }) {
+function TransactionItem({ transaction, colors }: { transaction: TransactionWithMeta; colors: any }) {
+  const { colors: COLORS } = useThemeStore();
+
   const typeColors: Record<string, string> = {
     income: colors.income,
     expense: colors.expense,
@@ -247,8 +249,8 @@ function TransactionItem({ transaction, colors }: { transaction: Transaction; co
     self_transfer: "swap-horizontal",
   };
 
-  const color = typeColors[transaction.type] || colors.primary;
-  const icon = typeIcons[transaction.type] || "circle";
+  const color = transaction.categoryColor || typeColors[transaction.type] || colors.primary;
+  const icon = transaction.categoryIcon || typeIcons[transaction.type] || "circle";
   const isIncome = transaction.type === "income";
 
   return (
@@ -263,21 +265,30 @@ function TransactionItem({ transaction, colors }: { transaction: Transaction; co
         <MaterialCommunityIcons name={icon as any} size={20} color={color} />
       </View>
       <View className="flex-1">
-        <Text
-          className="text-sm font-semibold"
-          style={{ color: colors.textPrimary }}
-          numberOfLines={1}
-        >
-          {transaction.note || transaction.type}
-        </Text>
-        <Text className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
-          {new Date(transaction.dateTime).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-        </Text>
-      </View>
+  <Text
+    className="text-sm font-semibold"
+    style={{ color: COLORS.textPrimary }}
+    numberOfLines={1}
+  >
+    {transaction.categoryName || transaction.type}
+  </Text>
+  {transaction.note && (
+    <Text
+      className="text-xs"
+      style={{ color: COLORS.textSecondary }}
+      numberOfLines={1}
+    >
+      {transaction.note}
+    </Text>
+  )}
+  <Text className="text-xs mt-0.5" style={{ color: COLORS.textMuted }}>
+    {transaction.accountName} · {new Date(transaction.dateTime).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}
+  </Text>
+</View>
       <Text
         className="text-sm font-bold"
         style={{ color: isIncome ? colors.income : colors.expense }}

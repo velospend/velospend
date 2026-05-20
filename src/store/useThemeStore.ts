@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Appearance } from "react-native";
+import { Appearance, ColorSchemeName } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS, DARK_COLORS } from "../constants";
 
@@ -13,19 +13,25 @@ interface ThemeStore {
   isDark: boolean;
   loadTheme: () => Promise<void>;
   setTheme: (mode: ThemeMode) => Promise<void>;
+  syncSystemTheme: () => void;
 }
 
-const getColors = (mode: ThemeMode): { colors: typeof COLORS; isDark: boolean } => {
+const resolveColors = (mode: ThemeMode): { colors: typeof COLORS; isDark: boolean } => {
+  let isDark = false;
+
   if (mode === "system") {
-    const systemTheme = Appearance.getColorScheme();
-    const isDark = systemTheme === "dark";
-    return { colors: isDark ? (DARK_COLORS as any) : COLORS, isDark };
+    isDark = Appearance.getColorScheme() === "dark";
+  } else {
+    isDark = mode === "dark";
   }
-  const isDark = mode === "dark";
-  return { colors: isDark ? (DARK_COLORS as any) : COLORS, isDark };
+
+  return {
+    colors: isDark ? (DARK_COLORS as any) : COLORS,
+    isDark,
+  };
 };
 
-export const useThemeStore = create<ThemeStore>((set) => ({
+export const useThemeStore = create<ThemeStore>((set, get) => ({
   mode: "system",
   colors: COLORS,
   isDark: false,
@@ -33,14 +39,15 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   loadTheme: async () => {
     try {
       const stored = await AsyncStorage.getItem(SETTINGS_KEY);
-      if (stored) {
-        const settings = JSON.parse(stored);
-        const mode: ThemeMode = settings.theme || "system";
-        const { colors, isDark } = getColors(mode);
-        set({ mode, colors, isDark });
-      }
+      const mode: ThemeMode = stored
+        ? JSON.parse(stored).theme || "system"
+        : "system";
+      const { colors, isDark } = resolveColors(mode);
+      set({ mode, colors, isDark });
     } catch (error) {
       console.error("Failed to load theme:", error);
+      const { colors, isDark } = resolveColors("system");
+      set({ mode: "system", colors, isDark });
     }
   },
 
@@ -52,10 +59,18 @@ export const useThemeStore = create<ThemeStore>((set) => ({
         SETTINGS_KEY,
         JSON.stringify({ ...settings, theme: mode })
       );
-      const { colors, isDark } = getColors(mode);
+      const { colors, isDark } = resolveColors(mode);
       set({ mode, colors, isDark });
     } catch (error) {
       console.error("Failed to save theme:", error);
+    }
+  },
+
+  syncSystemTheme: () => {
+    const { mode } = get();
+    if (mode === "system") {
+      const { colors, isDark } = resolveColors("system");
+      set({ colors, isDark });
     }
   },
 }));

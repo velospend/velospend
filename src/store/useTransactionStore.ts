@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { Transaction } from "../types";
-import { getRecentTransactions } from "../database/queries/transactions";
+import { getRecentTransactionsWithMeta } from "../database/queries/transactions";
+import { TransactionWithMeta } from "../types";
 
 interface TransactionStore {
-  recentTransactions: Transaction[];
+  recentTransactions: TransactionWithMeta[];
   loadRecentTransactions: (userId: string) => void;
 }
 
@@ -11,7 +11,7 @@ export const useTransactionStore = create<TransactionStore>((set) => ({
   recentTransactions: [],
 
   loadRecentTransactions: (userId: string) => {
-    const recentTransactions = getRecentTransactions(userId, 5);
+    const recentTransactions = getRecentTransactionsWithMeta(userId, 5);
     set({ recentTransactions });
   },
 }));
