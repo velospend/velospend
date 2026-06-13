@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   FlatList,
   StatusBar,
   Platform,
+  RefreshControl
 } from "react-native";
 import { useNavigation,useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -17,6 +18,7 @@ import { useUserStore } from "../../store/useUserStore";
 import { useTransactionStore } from "../../store/useTransactionStore";
 import { Account, Transaction, TransactionWithMeta } from "../../types";
 import { HomeStackParamList } from "../../types";
+import { usePrivacyStore } from "../../store/usePrivacyStore";
 
 type HomeNavProp = StackNavigationProp<HomeStackParamList, "HomeScreen">;
 
@@ -37,6 +39,23 @@ useFocusEffect(
   useCallback(() => {
     if (user) loadRecentTransactions(user.id);
   }, [user])
+);
+
+const [refreshing, setRefreshing] = useState(false);
+
+const onRefresh = useCallback(() => {
+  setRefreshing(true);
+  loadUser();
+  if (user) loadRecentTransactions(user.id);
+  setTimeout(() => setRefreshing(false), 800);
+}, [user]);
+
+const { isHidden, loadPreference, toggle } = usePrivacyStore();
+
+useFocusEffect(
+  useCallback(() => {
+    loadPreference();
+  }, [])
 );
 
   // const totalBalance = accounts.reduce(
@@ -72,60 +91,110 @@ useFocusEffect(
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={COLORS.primary}
+      colors={[COLORS.primary]}
+    />
+  }
       >
         {/* Account Cards Carousel */}
-        <View className="mt-5">
-          <View className="flex-row items-center justify-between px-5 mb-3">
-            <Text
-              className="text-base font-bold"
-              style={{ color: COLORS.textPrimary }}
-            >
-              My Accounts
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("AccountsScreen")}>
-              <Text
-                className="text-sm font-semibold"
-                style={{ color: COLORS.primary }}
-              >
-                See All
-              </Text>
-            </TouchableOpacity>
-          </View>
+<View className="mt-5">
+  <View className="flex-row items-center justify-between px-5 mb-3">
+    <Text
+      className="text-base font-bold"
+      style={{ color: COLORS.textPrimary }}
+    >
+      My Accounts
+    </Text>
+    <View className="flex-row items-center gap-3">
+    <TouchableOpacity onPress={toggle}>
+      <MaterialCommunityIcons
+        name={isHidden ? "eye-off" : "eye"}
+        size={20}
+        color={COLORS.textSecondary}
+      />
+    </TouchableOpacity>
+    <TouchableOpacity onPress={() => navigation.navigate("AccountsScreen")}>
+      <Text
+        className="text-sm font-semibold"
+        style={{ color: COLORS.primary }}
+      >
+        See All
+      </Text>
+    </TouchableOpacity>
+    </View>
+  </View>
 
-          <FlatList
-            data={[...accounts, { id: "add", name: "add" } as any]}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: SPACING.base }}
-            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-            renderItem={({ item }) => {
-              if (item.id === "add") {
-                return (
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("AddAccountScreen")}
-                    className="items-center justify-center rounded-2xl"
-                    style={{
-                      width: 60,
-                      height: 130,
-                      backgroundColor: COLORS.gray100,
-                      borderWidth: 2,
-                      borderColor: COLORS.border,
-                      borderStyle: "dashed",
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="plus"
-                      size={28}
-                      color={COLORS.gray400}
-                    />
-                  </TouchableOpacity>
-                );
-              }
-              return <AccountCard account={item} colors={COLORS} />;
-            }}
-          />
-        </View>
+  {accounts.length === 0 ? (
+    <TouchableOpacity
+      onPress={() => navigation.navigate("AddAccountScreen")}
+      className="mx-5 p-5 rounded-2xl items-center"
+      style={{
+        backgroundColor: COLORS.surface,
+        borderWidth: 2,
+        borderColor: COLORS.border,
+        borderStyle: "dashed",
+        ...SHADOWS.sm,
+      }}
+    >
+      <MaterialCommunityIcons
+        name="bank-plus"
+        size={36}
+        color={COLORS.primary}
+      />
+      <Text
+        className="text-sm font-bold mt-2"
+        style={{ color: COLORS.textPrimary }}
+      >
+        Add Your First Account
+      </Text>
+      <Text
+        className="text-xs text-center mt-1"
+        style={{ color: COLORS.textMuted }}
+      >
+        Track your bank, cash, wallet and more
+      </Text>
+    </TouchableOpacity>
+  ) : (
+    <FlatList
+      data={[...accounts, { id: "add", name: "add" } as any]}
+      keyExtractor={(item) => item.id}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: SPACING.base }}
+      ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+      renderItem={({ item }) => {
+        if (item.id === "add") {
+          return (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("AddAccountScreen")}
+              className="items-center justify-center rounded-2xl"
+              style={{
+                width: 60,
+                height: 130,
+                backgroundColor: COLORS.gray100,
+                borderWidth: 2,
+                borderColor: COLORS.border,
+                borderStyle: "dashed",
+              }}
+            >
+              <MaterialCommunityIcons
+                name="plus"
+                size={28}
+                color={COLORS.gray400}
+              />
+            </TouchableOpacity>
+          );
+        }
+        return <AccountCard account={item}  colors={COLORS} isHidden={isHidden}/>;
+      }}
+    />
+  )}
+</View>
+        
 
         {/* Recent Transactions */}
         <View className="mt-6 px-5">
@@ -136,6 +205,14 @@ useFocusEffect(
             >
               Recent Transactions
             </Text>
+            {recentTransactions.length > 0 && (
+        <Text
+          className="text-xs mt-0.5"
+          style={{ color: COLORS.textMuted }}
+        >
+          {recentTransactions.length} recent · tap to see all
+        </Text>
+      )}
             <TouchableOpacity
               onPress={() => navigation.navigate("TransactionsScreen")}
             >
@@ -147,6 +224,7 @@ useFocusEffect(
               </Text>
             </TouchableOpacity>
           </View>
+          
 
           {recentTransactions.length === 0 ? (
             <EmptyTransactions colors={COLORS}/>
@@ -175,7 +253,7 @@ useFocusEffect(
 
 // ─── Account Card ─────────────────────────────────────────────────────────────
 
-function AccountCard({ account, colors }: { account: Account; colors: any }) {
+function AccountCard({ account, colors, isHidden }: { account: Account; colors: any; isHidden: boolean }) {
   const accountColors: Record<string, string> = {
     gift_card: "#6C63FF",
     cash: "#2ECC71",
@@ -224,7 +302,7 @@ function AccountCard({ account, colors }: { account: Account; colors: any }) {
         {account.name}
       </Text>
       <Text className="text-white text-lg font-bold">
-        ₹{account.currentBalance.toLocaleString("en-IN")}
+        {isHidden ? "••••••" : `₹${account.currentBalance.toLocaleString("en-IN")}`}
       </Text>
     </View>
   );

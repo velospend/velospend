@@ -337,3 +337,34 @@ export const getRecentTransactionsWithMeta = (
     categoryColor: row.category_color || "",
   }));
 };
+
+export const searchTransactions = (
+  userId: string,
+  query: string
+): TransactionWithMeta[] => {
+  const db = getDatabase();
+  const searchQuery = `%${query}%`;
+
+  const rows = db.getAllSync<any>(
+    `SELECT t.*,
+      a.name as account_name,
+      c.name as category_name,
+      c.icon as category_icon,
+      c.color as category_color
+     FROM transactions t
+     LEFT JOIN accounts a ON t.account_id = a.id
+     LEFT JOIN categories c ON t.category_id = c.id
+     WHERE t.user_id = ? AND t.is_archived = 0
+     AND (t.note LIKE ? OR t.description LIKE ? OR c.name LIKE ? OR a.name LIKE ?)
+     ORDER BY t.date_time DESC`,
+    [userId, searchQuery, searchQuery, searchQuery, searchQuery]
+  );
+
+  return rows.map((row) => ({
+    ...mapTransaction(row),
+    accountName: row.account_name || "Unknown",
+    categoryName: row.category_name || "",
+    categoryIcon: row.category_icon || "",
+    categoryColor: row.category_color || "",
+  }));
+};

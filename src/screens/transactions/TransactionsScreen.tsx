@@ -7,6 +7,8 @@ import {
   StatusBar,
   Modal,
   ScrollView,
+  TextInput,
+  RefreshControl
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -14,7 +16,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS, SHADOWS } from "../../constants";
 import { useThemeStore } from "../../store/useThemeStore";
-import { getFilteredTransactions, getFilteredTransactionsWithMeta } from "../../database/queries/transactions";
+import { getFilteredTransactions, getFilteredTransactionsWithMeta, searchTransactions } from "../../database/queries/transactions";
 import { getCategoriesByUser } from "../../database/queries/categories";
 import { getAccountsByUser } from "../../database/queries/accounts";
 import { useUserStore } from "../../store/useUserStore";
@@ -50,18 +52,27 @@ export default function TransactionsScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const loadTransactions = useCallback(() => {
-    if (!user) return;
-    const results = getFilteredTransactionsWithMeta(user.id, {
-  type: selectedType || undefined,
-  accountId: selectedAccountId || undefined,
-  categoryId: selectedCategoryId || undefined,
-  startDate: startDate?.toISOString(),
-  endDate: endDate?.toISOString(),
-});
-setTransactions(results);
-  }, [user, selectedType, selectedAccountId, selectedCategoryId, startDate, endDate]);
+  if (!user) return;
+
+  if (searchQuery.trim()) {
+    const results = searchTransactions(user.id, searchQuery.trim());
+    setTransactions(results);
+    return;
+  }
+
+  const results = getFilteredTransactionsWithMeta(user.id, {
+    type: selectedType || undefined,
+    accountId: selectedAccountId || undefined,
+    categoryId: selectedCategoryId || undefined,
+    startDate: startDate?.toISOString(),
+    endDate: endDate?.toISOString(),
+  });
+  setTransactions(results);
+}, [user, selectedType, selectedAccountId, selectedCategoryId, startDate, endDate, searchQuery]);
 
   useFocusEffect(
     useCallback(() => {
@@ -135,6 +146,14 @@ setTransactions(results);
 
   const getCategoryById = (id: string) =>
     categories.find((c) => c.id === id);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+const onRefresh = useCallback(() => {
+  setRefreshing(true);
+  loadTransactions();
+  setTimeout(() => setRefreshing(false), 800);
+}, [loadTransactions]);
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.background }}>
@@ -248,6 +267,45 @@ setTransactions(results);
         </View>
       )}
 
+{/* Search Bar */}
+<View className="mt-3">
+  <View
+    className="flex-row items-center rounded-xl px-3"
+    style={{
+      backgroundColor: "rgba(255,255,255,0.15)",
+      borderWidth: 1,
+      borderColor: "rgba(255,255,255,0.2)",
+    }}
+  >
+    <MaterialCommunityIcons name="magnify" size={18} color="white" />
+    <TextInput
+      value={searchQuery}
+      onChangeText={(text) => {
+        setSearchQuery(text);
+        setIsSearching(text.length > 0);
+      }}
+      placeholder="Search transactions..."
+      placeholderTextColor="rgba(255,255,255,0.5)"
+      className="flex-1 py-2.5 px-2 text-sm"
+      style={{ color: "white" }}
+    />
+    {searchQuery.length > 0 && (
+      <TouchableOpacity
+        onPress={() => {
+          setSearchQuery("");
+          setIsSearching(false);
+        }}
+      >
+        <MaterialCommunityIcons
+          name="close-circle"
+          size={18}
+          color="rgba(255,255,255,0.7)"
+        />
+      </TouchableOpacity>
+    )}
+  </View>
+</View>
+
       {/* Grouped Transaction List */}
       {grouped.length === 0 ? (
         <EmptyTransactions colors={COLORS} />
@@ -257,6 +315,14 @@ setTransactions(results);
           keyExtractor={(item) => item.title}
           contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+  <RefreshControl
+    refreshing={refreshing}
+    onRefresh={onRefresh}
+    tintColor={COLORS.primary}
+    colors={[COLORS.primary]}
+  />
+}
           renderItem={({ item: group }) => (
             <View className="mb-4">
               {/* Date Header */}
