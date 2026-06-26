@@ -284,6 +284,7 @@ useEffect(() => {
       className="flex-1"
       style={{ backgroundColor: COLORS.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <StatusBar barStyle="light-content" backgroundColor={activeColor} />
 
@@ -340,8 +341,9 @@ useEffect(() => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
         {/* Date & Time */}
         <SectionCard title="Date & Time" colors={COLORS}>
